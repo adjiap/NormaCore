@@ -1,0 +1,143 @@
+name: normacore
+
+networks:
+  normacore-net:
+    driver: bridge
+
+volumes:
+  qdrant-data:
+  ollama-data:
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    networks:
+      - normacore-net
+    labels:
+      project: normacore
+      component: vector-store
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  ollama-cpu:
+    image: ollama/ollama:latest
+    container_name: ollama-container
+    profiles:
+      - cpu
+    environment:
+      - MOUNT_TYPE=${LOCAL_DOWNLOADED_MODELS_MOUNTED:+bind_mount}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama-container:11434}
+      - OLLAMA_NUM_PARALLEL=2
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_GPU_LAYERS=0
+    volumes:
+      - "${LOCAL_DOWNLOADED_MODELS_MOUNTED:-ollama-data}:/root/.ollama"
+    restart: unless-stopped
+    entrypoint: >
+      sh -c "
+      if [ -z \"$$MOUNT_TYPE\" ]; then
+        echo '⚠️  WARNING: Using named volume (ollama-data). Set LOCAL_DOWNLOADED_MODELS_MOUNTED in .env for bind mount.'
+      else
+        echo '✅ Using bind mount from host: '$$LOCAL_DOWNLOADED_MODELS_MOUNTED
+      fi &&
+      exec /bin/ollama serve
+      "
+    networks:
+      - normacore-net
+    labels:
+      project: normacore
+      component: embedding
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  ollama-gpu-docker:
+    image: ollama/ollama:latest
+    container_name: ollama-container
+    profiles:
+      - gpu-docker
+    environment:
+      - MOUNT_TYPE=${LOCAL_DOWNLOADED_MODELS_MOUNTED:+bind_mount}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama-container:11434}
+      - OLLAMA_NUM_PARALLEL=4
+      - OLLAMA_MAX_LOADED_MODELS=2
+      - OLLAMA_GPU_LAYERS=999
+    volumes:
+      - "${LOCAL_DOWNLOADED_MODELS_MOUNTED:-ollama-data}:/root/.ollama"
+    restart: unless-stopped
+    entrypoint: >
+      sh -c "
+      if [ -z \"$$MOUNT_TYPE\" ]; then
+        echo '⚠️  WARNING: Using named volume (ollama-data). Set LOCAL_DOWNLOADED_MODELS_MOUNTED in .env for bind mount.'
+      else
+        echo '✅ Using bind mount from host: '$$LOCAL_DOWNLOADED_MODELS_MOUNTED
+      fi &&
+      exec /bin/ollama serve
+      "
+    networks:
+      - normacore-net
+    labels:
+      project: normacore
+      component: embedding
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  ollama-gpu-podman:
+    image: ollama/ollama:latest
+    container_name: ollama-container
+    profiles:
+      - gpu-podman
+    environment:
+      - MOUNT_TYPE=${LOCAL_DOWNLOADED_MODELS_MOUNTED:+bind_mount}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama-container:11434}
+      - OLLAMA_NUM_PARALLEL=4
+      - OLLAMA_MAX_LOADED_MODELS=2
+      - OLLAMA_GPU_LAYERS=999
+    volumes:
+      - "${LOCAL_DOWNLOADED_MODELS_MOUNTED:-ollama-data}:/root/.ollama"
+    restart: unless-stopped
+    entrypoint: >
+      sh -c "
+      if [ -z \"$$MOUNT_TYPE\" ]; then
+        echo '⚠️  WARNING: Using named volume (ollama-data). Set LOCAL_DOWNLOADED_MODELS_MOUNTED in .env for bind mount.'
+      else
+        echo '✅ Using bind mount from host: '$$LOCAL_DOWNLOADED_MODELS_MOUNTED
+      fi &&
+      exec /bin/ollama serve
+      "
+    networks:
+      - normacore-net
+    labels:
+      project: normacore
+      component: embedding
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    devices:
+      - nvidia.com/gpu=all
