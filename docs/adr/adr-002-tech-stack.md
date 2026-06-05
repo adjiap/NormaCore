@@ -84,6 +84,11 @@ Alternatives considered:
   require substantially more VRAM.
 - IBM Granite Embedding: smaller ecosystem and less multilingual coverage.
 
+> [!TIP]
+> Sparse vector generation via BGE-M3 was evaluated on both Ollama and TEI.
+> Neither exposes sparse output for this model architecture. Qdrant native BM25
+> (SparseVectorParams, modifier=idf) is used for the sparse component instead.
+
 ### 3.1 Embedding service deployment
 
 The embedding model is served over HTTP, not loaded in-process. Two supported
