@@ -1,0 +1,10 @@
+corpus_id: test-corpus
+description: Small public-domain test corpus for NormaCore development.
+sources:
+  - name: sample-standard
+    path: ./standard.md
+    type: markdown
+  - name: glossary
+    path: ./glossary.md
+    type: markdown
+eval_fixtures: ./eval/
