@@ -107,7 +107,7 @@ class QdrantVectorStore(VectorStore):
         await self._client.create_collection(
             collection_name=corpus_id,
             vectors_config={"dense": VectorParams(size=1024, distance=Distance.COSINE)},
-            sparse_vectors_config={"sparse": SparseVectorParams(modifier=Modifier.Idf)},
+            sparse_vectors_config={"sparse": SparseVectorParams(modifier=Modifier.IDF)},
         )
         logger.info("Collection %s created", corpus_id)
 

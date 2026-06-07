@@ -112,7 +112,10 @@ eval: ## Run retrieval eval harness (usage: make eval CORPUS=<name>)
 # Testing
 # ==============================================================================
 
-test: ## Run unit tests with coverage
+test: ## Run unit tests
+	uv run pytest tests/ -v
+
+test-cov: ## Run unit tests with coverage
 	uv run pytest tests/ -v --cov=src --cov-report=term-missing
 
 # ==============================================================================
