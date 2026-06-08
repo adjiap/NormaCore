@@ -1,0 +1,24 @@
+- query: "What is the scope of this standard?"
+  expected_chunks:
+    - chunk_id: "1"
+      min_rank: 1
+
+- query: "What systems does this standard apply to?"
+  expected_chunks:
+    - chunk_id: "1.2"
+      min_rank: 2
+
+- query: "What is a safety goal?"
+  expected_chunks:
+    - chunk_id: "2.1"
+      min_rank: 2
+
+- query: "What are the general requirements?"
+  expected_chunks:
+    - chunk_id: "3.1"
+      min_rank: 1
+
+- query: "What is excluded from this standard?"
+  expected_chunks:
+    - chunk_id: "1.2.2"
+      min_rank: 3
