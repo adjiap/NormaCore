@@ -103,10 +103,10 @@ run: ## Start the API server locally (requires compose services running)
 # ==============================================================================
 
 ingest: ## Ingest a corpus (usage: make ingest CORPUS=<name>)
-	uv run python scripts/ingest.py --corpus-manifest corpora/$(CORPUS)/corpus.yaml --corpus-id $(CORPUS)
+	uv run normacore-ingest --corpus-manifest corpora/$(CORPUS)/corpus.yaml --corpus-id $(CORPUS)
 
 eval: ## Run retrieval eval harness (usage: make eval CORPUS=<name>)
-	uv run pytest tests/test_eval.py --corpus=$(CORPUS) -v
+	uv run normacore-eval --corpus-id $(CORPUS) --fixtures corpora/$(CORPUS)/eval/fixtures.yaml
 
 # ==============================================================================
 # Testing

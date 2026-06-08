@@ -35,6 +35,10 @@ dev = [
     "ruff>=0.15.16",
 ]
 
+[project.scripts]
+normacore-ingest = "normacore.ingest:main"
+normacore-eval = "normacore.eval:main"
+
 [tool.black]
 line-length = 88
 target-version = ["py312"]
