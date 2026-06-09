@@ -126,6 +126,11 @@ test: ## Run unit tests
 test-cov: ## Run unit tests with coverage
 	uv run pytest tests/ -v --cov=src --cov-report=term-missing
 
+test-ingestion: ## Testing ingestion with demo corpus
+	make ingest CORPUS=test-corpus
+test-eval: test-ingestion ## Testing eval after ingestion with demo corpus
+	make eval CORPUS=test-corpus
+
 # ==============================================================================
 # Code Quality
 # ==============================================================================
