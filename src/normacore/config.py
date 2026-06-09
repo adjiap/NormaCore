@@ -12,8 +12,7 @@ class Settings(BaseSettings):
     """NormaCore runtime settings.
 
     All values are read from environment variables or .env file.
-    Defaults point to the compose.yaml service names for container use,
-    and to localhost for local development.
+    Defaults point to localhost for local development.
     """
 
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
