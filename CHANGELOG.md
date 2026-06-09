@@ -7,6 +7,54 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+#### Core Pipeline
+
+- `src/normacore/embedding.py` — async Ollama `/api/embed` client with retry
+  logic and Pydantic response models
+- `src/normacore/vector_store.py` — `VectorStore` ABC and `QdrantVectorStore`
+  implementation with dense vector search
+- `src/normacore/markdown_reader.py` — structure-aware Markdown reader
+  supporting ISO/IEC, NIST, and unnumbered heading patterns
+- `src/normacore/chunker.py` — structure-aware chunker with glossary detection
+  and recursive fallback for oversized sections
+- `src/normacore/ingest.py` — corpus ingestion pipeline with batched embedding
+  and idempotent collection creation; `normacore-ingest` entry point
+- `src/normacore/eval.py` — Recall@5 and MRR evaluation harness;
+  `normacore-eval` entry point
+
+#### Test Corpus
+
+- `corpora/test-corpus/standard.md` — synthetic ISO-style Markdown corpus
+- `corpora/test-corpus/corpus.yaml` — corpus manifest
+- `corpora/test-corpus/eval/fixtures.yaml` — 5 curated eval queries
+
+#### Developer Experience
+
+- `compose.override.example.yaml` — dev-only port bindings template
+  (copied to `compose.override.yaml` by `make setup`)
+- `Makefile` — added `compose-dev`, `test-ingestion`, `test-eval` targets
+
+### Fixed
+
+- `EmbeddingResponse` field renamed from `embedding` to `embeddings` to match
+  Ollama `/api/embed` response schema
+- `search_hybrid` simplified to dense-only search; sparse `Prefetch` with raw
+  query text caused Qdrant 400 errors (sparse pipeline deferred to post-v0.1.0)
+- Healthchecks updated to `/dev/tcp` TCP probe — Qdrant image ships neither
+  `curl` nor `wget`
+- `compose.yaml` port bindings moved to `compose.override.yaml`; production
+  deployment no longer exposes Qdrant or Ollama ports to the host
+
+### Known Limitations
+
+- Sparse/hybrid RRF retrieval not functional — BGE-M3 sparse vectors not
+  exposed by Ollama; dense-only search used; Qdrant native BM25 deferred
+- Markdown ingestion only — PDF support planned for v0.2.0
+- No HTTP retrieval API (`POST /retrieve`) — planned for v0.2.0
+- No reranking, query rewriting, or authentication
+
 ## [0.1.0-dev] — 2026-06-03
 
 ### Description
