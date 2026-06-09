@@ -15,13 +15,13 @@ class EmbeddingRequest(BaseModel):
     """Request model for the embedding service."""
 
     model: str
-    prompt: str
+    input: str
 
 
 class EmbeddingResponse(BaseModel):
     """Response model for the embedding service."""
 
-    embedding: list[float]
+    embeddings: list[list[float]]
 
 
 class EmbeddingClient:
@@ -56,18 +56,18 @@ class EmbeddingClient:
             for input_text in inputs:
                 request = EmbeddingRequest(
                     model=settings.embedding_model,
-                    prompt=input_text,
+                    input=input_text,
                 )
                 response = await client.post(
-                    f"{settings.embedding_base_url}/api/embeddings",
+                    f"{settings.embedding_base_url}/api/embed",
                     json=request.model_dump(),
                 )
                 response.raise_for_status()
                 parsed = EmbeddingResponse.model_validate(response.json())
                 logger.debug(
-                    "Received embedding of dimension %s", len(parsed.embedding)
+                    "Received embedding of dimension %s", len(parsed.embeddings)
                 )
-                results.append(parsed.embedding)
+                results.append(parsed.embeddings[0])
 
         logger.debug("Embedded %s input(s) successfully", len(results))
         return results

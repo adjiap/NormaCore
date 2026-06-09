@@ -21,7 +21,7 @@ def make_mock_response(embedding: list[float]) -> MagicMock:
     """Build a mock httpx response returning the given embedding vector."""
     response = MagicMock()
     response.raise_for_status = MagicMock()
-    response.json.return_value = {"embedding": embedding}
+    response.json.return_value = {"embeddings": [embedding]}  # list[list[float]]
     return response
 
 
