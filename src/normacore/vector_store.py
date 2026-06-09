@@ -80,6 +80,14 @@ class VectorStore(ABC):
             NotImplementedError: If not implemented by subclass.
         """
 
+    @abstractmethod
+    async def list_collections(self) -> list[str]:
+        """List all collection names in the vector store.
+
+        Returns:
+            List of corpus ID strings.
+        """
+
 
 class QdrantVectorStore(VectorStore):
     """Qdrant implementation of the VectorStore interface."""
@@ -180,3 +188,13 @@ class QdrantVectorStore(VectorStore):
         logger.info("Deleting collection %s", corpus_id)
         await self._client.delete_collection(corpus_id)
         logger.info("Collection %s deleted", corpus_id)
+
+    async def list_collections(self) -> list[str]:
+        """List all collection names in the vector store.
+
+        Returns:
+            List of corpus ID strings.
+        """
+        logger.info("Listing collections")
+        collections = await self._client.get_collections()
+        return [c.name for c in collections.collections]

@@ -38,6 +38,7 @@ dev = [
 [project.scripts]
 normacore-ingest = "normacore.ingest:main"
 normacore-eval = "normacore.eval:main"
+normacore-api = "normacore.api:app"
 
 [tool.black]
 line-length = 88
