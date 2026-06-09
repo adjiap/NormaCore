@@ -6,10 +6,8 @@ from abc import ABC, abstractmethod
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.models import (
     Distance,
-    FusionQuery,
     Modifier,
     PointStruct,
-    Prefetch,
     SparseVector,
     SparseVectorParams,
     VectorParams,
@@ -149,29 +147,15 @@ class QdrantVectorStore(VectorStore):
         top_k: int = 5,
         alpha: float = 0.7,
     ) -> list[dict]:
-        """Run hybrid search and return ranked chunks.
-
-        Args:
-            corpus_id: Target collection identifier.
-            query_vector: Dense query embedding.
-            query_text: Raw query text for BM25 sparse search.
-            top_k: Number of results to return.
-            alpha: Weight for dense vs sparse (1.0 = dense only).
-
-        Returns:
-            List of chunk dicts with text, score, and metadata.
-        """
+        """Run hybrid search and return ranked chunks."""
         logger.info(
             "Running hybrid search on %s (top_k=%s, alpha=%s)", corpus_id, top_k, alpha
         )
 
         results = await self._client.query_points(
             collection_name=corpus_id,
-            prefetch=[
-                Prefetch(query=query_vector, using="dense", limit=top_k * 2),
-                Prefetch(query=query_text, using="sparse", limit=top_k * 2),
-            ],
-            query=FusionQuery(fusion="rrf"),
+            query=query_vector,
+            using="dense",
             limit=top_k,
         )
 
