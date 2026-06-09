@@ -239,3 +239,6 @@ logs/
 
 # Secrets baseline
 .secrets.baseline
+
+# compose override
+compose.override.yaml

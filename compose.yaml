@@ -12,8 +12,6 @@ services:
   qdrant:
     image: qdrant/qdrant:latest
     restart: unless-stopped
-    ports:
-      - "6333:6333"
     volumes:
       - qdrant-data:/qdrant/storage
     networks:
@@ -30,7 +28,6 @@ services:
 
   ollama-cpu:
     image: ollama/ollama:latest
-    container_name: ollama-container
     profiles:
       - cpu
     environment:
@@ -65,7 +62,6 @@ services:
 
   ollama-gpu-docker:
     image: ollama/ollama:latest
-    container_name: ollama-container
     profiles:
       - gpu-docker
     environment:
@@ -107,7 +103,6 @@ services:
 
   ollama-gpu-podman:
     image: ollama/ollama:latest
-    container_name: ollama-container
     profiles:
       - gpu-podman
     environment:

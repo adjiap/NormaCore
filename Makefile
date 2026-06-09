@@ -30,6 +30,7 @@ help: ## Show this help message
 
 setup: ## One-time dev environment setup (uv sync, secrets baseline, pre-commit)
 	cp .env.example .env
+	cp compose.override.example.yaml compose.override.yaml
 	uv sync --group dev
 	uv run detect-secrets scan > .secrets.baseline
 	uv run pre-commit install
@@ -49,6 +50,13 @@ compose: check ## Auto-detect GPU and start containers
 	[ "$$PROFILE" = "gpu" ] && PROFILE="$${PROFILE}-$${RUNTIME}" ; \
 	echo "Starting with profile: $$PROFILE" && \
 	$$COMPOSE -f compose.yaml --profile $$PROFILE up -d
+
+compose-dev: check ## Start containers in dev mode with exposed ports (Auto-detect GPU)
+	@PROFILE=$$($(DETECT_GPU)) && \
+	COMPOSE=$$($(DETECT_COMPOSE)) && \
+	RUNTIME=$$($(DETECT_RUNTIME)) && \
+	echo "Starting in dev mode (ports exposed) and with profile: $$PROFILE" && \
+	$$COMPOSE -f compose.yaml -f compose.override.yaml --profile $$PROFILE up -d
 
 compose-cpu: check ## Force CPU mode regardless of hardware
 	@COMPOSE=$$($(DETECT_COMPOSE)) && \
