@@ -35,6 +35,8 @@ services:
       ollama-gpu-podman:
         condition: service_healthy
         required: false
+    volumes:
+      - "${LOCAL_CORPORA_PATH:-./corpora}:/app/corpora:ro"
     healthcheck:
       test: ["CMD-SHELL", "uv run python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health')\""]
       interval: 30s
