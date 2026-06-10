@@ -36,7 +36,7 @@ services:
         condition: service_healthy
         required: false
     healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/8000 || exit 1"]
+      test: ["CMD-SHELL", "uv run python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -53,7 +53,7 @@ services:
       project: normacore
       component: vector-store
     healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/6333 || exit 1"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/6333'"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -88,7 +88,7 @@ services:
       project: normacore
       component: embedding
     healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/11434 || exit 1"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/11434'"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -123,7 +123,7 @@ services:
       project: normacore
       component: embedding
     healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/11434 || exit 1"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/11434'"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -165,7 +165,7 @@ services:
       project: normacore
       component: embedding
     healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/11434 || exit 1"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/11434'"]
       interval: 30s
       timeout: 10s
       retries: 3
