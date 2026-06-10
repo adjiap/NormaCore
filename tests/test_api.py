@@ -168,3 +168,56 @@ class TestRetrieve:
                 json={"corpus_id": "test-corpus", "query": "scope", "alpha": 1.5},
             )
         assert response.status_code == 422
+
+
+class TestIngest:
+
+    @pytest.mark.asyncio
+    async def test_ingest_returns_response(self, client, mock_vector_store):
+        """POST /v1/ingest returns corpus_id, chunks_indexed, and elapsed_ms."""
+        with patch(
+            "normacore.api.ingest_corpus", new_callable=AsyncMock
+        ) as mock_ingest:
+            mock_ingest.return_value = 10
+            async with client as c:
+                response = await c.post(
+                    "/v1/ingest",
+                    json={"corpus_id": "test-corpus"},
+                )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["corpus_id"] == "test-corpus"
+        assert body["chunks_indexed"] == 10
+        assert "elapsed_ms" in body
+
+    @pytest.mark.asyncio
+    async def test_ingest_manifest_not_found_returns_404(self, client):
+        """POST /v1/ingest returns 404 when corpus manifest does not exist."""
+        async with client as c:
+            response = await c.post(
+                "/v1/ingest",
+                json={"corpus_id": "nonexistent-corpus"},
+            )
+        assert response.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_ingest_ingestion_error_returns_500(self, client):
+        """POST /v1/ingest returns 500 when ingestion fails."""
+        with patch(
+            "normacore.api.ingest_corpus", new_callable=AsyncMock
+        ) as mock_ingest:
+            mock_ingest.side_effect = Exception("embedding timeout")
+            with patch("normacore.api.Path.exists", return_value=True):
+                async with client as c:
+                    response = await c.post(
+                        "/v1/ingest",
+                        json={"corpus_id": "test-corpus"},
+                    )
+        assert response.status_code == 500
+
+    @pytest.mark.asyncio
+    async def test_ingest_missing_corpus_id_returns_422(self, client):
+        """POST /v1/ingest returns 422 when corpus_id is missing."""
+        async with client as c:
+            response = await c.post("/v1/ingest", json={})
+        assert response.status_code == 422
