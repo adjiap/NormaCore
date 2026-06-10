@@ -52,9 +52,9 @@ class TestHealth:
 
     @pytest.mark.asyncio
     async def test_health_returns_ok(self, client):
-        """GET /health returns status ok."""
+        """GET /v1/health returns status ok."""
         async with client as c:
-            response = await c.get("/health")
+            response = await c.get("/v1/health")
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
 
@@ -63,18 +63,18 @@ class TestListCorpora:
 
     @pytest.mark.asyncio
     async def test_list_corpora_returns_names(self, client, mock_vector_store):
-        """GET /corpora returns list of corpus IDs."""
+        """GET /v1/corpora returns list of corpus IDs."""
         async with client as c:
-            response = await c.get("/corpora")
+            response = await c.get("/v1/corpora")
         assert response.status_code == 200
         assert response.json() == ["test-corpus", "iso-26262"]
 
     @pytest.mark.asyncio
     async def test_list_corpora_vector_store_error(self, client, mock_vector_store):
-        """GET /corpora returns 500 when vector store is unavailable."""
+        """GET /v1/corpora returns 500 when vector store is unavailable."""
         mock_vector_store.list_collections.side_effect = Exception("connection refused")
         async with client as c:
-            response = await c.get("/corpora")
+            response = await c.get("/v1/corpora")
         assert response.status_code == 500
 
 
@@ -84,10 +84,10 @@ class TestRetrieve:
     async def test_retrieve_returns_chunks(
         self, client, mock_embedding_client, mock_vector_store
     ):
-        """POST /retrieve returns ranked chunks with metadata."""
+        """POST /v1/retrieve returns ranked chunks with metadata."""
         async with client as c:
             response = await c.post(
-                "/retrieve",
+                "/v1/retrieve",
                 json={"corpus_id": "test-corpus", "query": "What is the scope?"},
             )
         assert response.status_code == 200
@@ -101,10 +101,10 @@ class TestRetrieve:
     async def test_retrieve_passes_top_k(
         self, client, mock_embedding_client, mock_vector_store
     ):
-        """POST /retrieve passes top_k to the vector store."""
+        """POST /v1/retrieve passes top_k to the vector store."""
         async with client as c:
             await c.post(
-                "/retrieve",
+                "/v1/retrieve",
                 json={"corpus_id": "test-corpus", "query": "scope", "top_k": 3},
             )
         call_kwargs = mock_vector_store.search_hybrid.call_args.kwargs
@@ -114,10 +114,10 @@ class TestRetrieve:
     async def test_retrieve_passes_alpha(
         self, client, mock_embedding_client, mock_vector_store
     ):
-        """POST /retrieve passes alpha to the vector store."""
+        """POST /v1/retrieve passes alpha to the vector store."""
         async with client as c:
             await c.post(
-                "/retrieve",
+                "/v1/retrieve",
                 json={"corpus_id": "test-corpus", "query": "scope", "alpha": 0.5},
             )
         call_kwargs = mock_vector_store.search_hybrid.call_args.kwargs
@@ -127,11 +127,11 @@ class TestRetrieve:
     async def test_retrieve_embedding_error_returns_500(
         self, client, mock_embedding_client, mock_vector_store
     ):
-        """POST /retrieve returns 500 when embedding service fails."""
+        """POST /v1/retrieve returns 500 when embedding service fails."""
         mock_embedding_client.embed.side_effect = Exception("embedding timeout")
         async with client as c:
             response = await c.post(
-                "/retrieve",
+                "/v1/retrieve",
                 json={"corpus_id": "test-corpus", "query": "scope"},
             )
         assert response.status_code == 500
@@ -140,31 +140,31 @@ class TestRetrieve:
     async def test_retrieve_vector_store_error_returns_404(
         self, client, mock_embedding_client, mock_vector_store
     ):
-        """POST /retrieve returns 404 when corpus is not found."""
+        """POST /v1/retrieve returns 404 when corpus is not found."""
         mock_vector_store.search_hybrid.side_effect = Exception("collection not found")
         async with client as c:
             response = await c.post(
-                "/retrieve",
+                "/v1/retrieve",
                 json={"corpus_id": "nonexistent", "query": "scope"},
             )
         assert response.status_code == 404
 
     @pytest.mark.asyncio
     async def test_retrieve_top_k_validation(self, client):
-        """POST /retrieve rejects top_k outside valid range."""
+        """POST /v1/retrieve rejects top_k outside valid range."""
         async with client as c:
             response = await c.post(
-                "/retrieve",
+                "/v1/retrieve",
                 json={"corpus_id": "test-corpus", "query": "scope", "top_k": 0},
             )
         assert response.status_code == 422
 
     @pytest.mark.asyncio
     async def test_retrieve_alpha_validation(self, client):
-        """POST /retrieve rejects alpha outside 0.0–1.0 range."""
+        """POST /v1/retrieve rejects alpha outside 0.0–1.0 range."""
         async with client as c:
             response = await c.post(
-                "/retrieve",
+                "/v1/retrieve",
                 json={"corpus_id": "test-corpus", "query": "scope", "alpha": 1.5},
             )
         assert response.status_code == 422

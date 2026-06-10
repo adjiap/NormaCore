@@ -64,7 +64,7 @@ Once functional (v0.1.0), ingest a corpus and query it:
 
 ```bash
 make ingest CORPUS=my-corpus
-curl -X POST http://localhost:8000/retrieve \
+curl -X POST http://localhost:8000/v1/retrieve \
   -H "Content-Type: application/json" \
   -d '{"corpus_id": "my-corpus", "query": "definition of risk"}'
 ```

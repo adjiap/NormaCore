@@ -1,16 +1,16 @@
 """FastAPI application for NormaCore retrieval service.
 
 Exposes three endpoints:
-- POST /retrieve  — query a corpus and return ranked chunks
-- GET  /corpora   — list available corpora
-- GET  /health    — liveness healthcheck
+- POST /v1/retrieve  — query a corpus and return ranked chunks
+- GET  /v1/corpora   — list available corpora
+- GET  /v1/health    — liveness healthcheck
 """
 
 import argparse
 import logging
 import time
 
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from normacore.config import settings
@@ -25,6 +25,7 @@ app = FastAPI(
     description="Self-hostable RAG ingestion and retrieval platform for structured documents.",
     version="0.1.0",
 )
+router = APIRouter(prefix="/v1")
 
 
 class RetrieveRequest(BaseModel):
@@ -80,7 +81,7 @@ class HealthResponse(BaseModel):
     status: str
 
 
-@app.post("/retrieve", response_model=RetrieveResponse)
+@router.post("/retrieve", response_model=RetrieveResponse)
 async def retrieve(request: RetrieveRequest) -> RetrieveResponse:
     """Query a corpus and return ranked chunks.
 
@@ -151,7 +152,7 @@ async def retrieve(request: RetrieveRequest) -> RetrieveResponse:
     return RetrieveResponse(results=results, query_time_ms=elapsed_ms)
 
 
-@app.get("/corpora", response_model=list[str])
+@router.get("/corpora", response_model=list[str])
 async def list_corpora() -> list[str]:
     """List all available corpus IDs in the vector store.
 
@@ -172,7 +173,7 @@ async def list_corpora() -> list[str]:
         ) from exc
 
 
-@app.get("/health", response_model=HealthResponse)
+@router.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
     """Liveness healthcheck.
 
@@ -180,6 +181,9 @@ async def health() -> HealthResponse:
         HealthResponse with status 'ok'.
     """
     return HealthResponse(status="ok")
+
+
+app.include_router(router)
 
 
 def parse_args() -> argparse.Namespace:

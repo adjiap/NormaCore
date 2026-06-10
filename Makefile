@@ -142,11 +142,11 @@ test-eval: test-ingestion ## Testing eval after ingestion with demo corpus (requ
 
 test-api: ## Smoke test the running API service (requires make compose-dev + make test-ingestion) [API_PORT=8000]
 	@echo "--- GET /health ---" && \
-	curl -sf http://localhost:$(API_PORT)/health | python3 -m json.tool && \
+	curl -sf http://localhost:$(API_PORT)/v1/health | python3 -m json.tool && \
 	echo "--- GET /corpora ---" && \
-	curl -sf http://localhost:$(API_PORT)/corpora | python3 -m json.tool && \
+	curl -sf http://localhost:$(API_PORT)/v1/corpora | python3 -m json.tool && \
 	echo "--- POST /retrieve ---" && \
-	curl -sf -X POST http://localhost:$(API_PORT)/retrieve \
+	curl -sf -X POST http://localhost:$(API_PORT)/v1/retrieve \
 	  -H "Content-Type: application/json" \
 	  -d '{"corpus_id": "test-corpus", "query": "What is the scope?"}' | python3 -m json.tool
 

@@ -46,6 +46,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `curl` nor `wget`
 - `compose.yaml` port bindings moved to `compose.override.yaml`; production
   deployment no longer exposes Qdrant or Ollama ports to the host
+- API routes prefixed with `/v1/` — all endpoints now at `/v1/retrieve`,
+  `/v1/corpora`, `/v1/health`, etc.
 
 ### Known Limitations
 
