@@ -9,6 +9,39 @@ volumes:
   ollama-data:
 
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
+      - EMBEDDING_BASE_URL=${EMBEDDING_BASE_URL:-http://ollama-container:11434}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-bge-m3}
+    networks:
+      - normacore-net
+    labels:
+      project: normacore
+      component: api
+    depends_on:
+      qdrant:
+        condition: service_healthy
+      ollama-cpu:
+        condition: service_healthy
+        required: false
+      ollama-gpu-docker:
+        condition: service_healthy
+        required: false
+      ollama-gpu-podman:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/8000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
   qdrant:
     image: qdrant/qdrant:latest
     restart: unless-stopped
@@ -28,6 +61,7 @@ services:
 
   ollama-cpu:
     image: ollama/ollama:latest
+    container_name: ollama-container
     profiles:
       - cpu
     environment:
@@ -62,6 +96,7 @@ services:
 
   ollama-gpu-docker:
     image: ollama/ollama:latest
+    container_name: ollama-container
     profiles:
       - gpu-docker
     environment:
@@ -103,6 +138,7 @@ services:
 
   ollama-gpu-podman:
     image: ollama/ollama:latest
+    container_name: ollama-container
     profiles:
       - gpu-podman
     environment:

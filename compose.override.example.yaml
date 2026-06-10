@@ -1,6 +1,10 @@
 name: normacore
 
 services:
+  api:
+    ports:
+      - "8000:8000"
+
   qdrant:
     ports:
       - "6333:6333"
