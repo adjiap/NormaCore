@@ -9,7 +9,7 @@ volumes:
   ollama-data:
 
 services:
-  api:
+  rag:
     build:
       context: .
       dockerfile: Dockerfile
