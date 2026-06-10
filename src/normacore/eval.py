@@ -23,6 +23,7 @@ from pathlib import Path
 
 import yaml
 
+from normacore.config import settings
 from normacore.embedding import EmbeddingClient
 from normacore.logging import configure_logging
 from normacore.vector_store import QdrantVectorStore
@@ -336,7 +337,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     """Entry point for the evaluation script."""
-    configure_logging(Path("logs/eval.log"))
+    configure_logging(settings.log_file, settings.log_level)
     args = parse_args()
 
     fixtures = load_fixtures(args.fixtures)

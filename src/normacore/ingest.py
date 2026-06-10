@@ -20,6 +20,7 @@ from pathlib import Path
 import yaml
 
 from normacore.chunker import Chunker
+from normacore.config import settings
 from normacore.embedding import EmbeddingClient
 from normacore.logging import configure_logging
 from normacore.markdown_reader import MarkdownReader
@@ -180,7 +181,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     """Entry point for the ingestion script."""
-    configure_logging(Path("logs/ingest.log"))
+    configure_logging(settings.log_file, settings.log_level)
     args = parse_args()
     asyncio.run(ingest_corpus(args.corpus_manifest, args.corpus_id))
 
