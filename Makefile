@@ -5,6 +5,7 @@
 # ==============================================================================
 
 SCRIPTS_DIR := scripts
+API_PORT ?= 8000
 
 DETECT_GPU     := $(SCRIPTS_DIR)/detect_gpu.sh
 DETECT_COMPOSE := $(SCRIPTS_DIR)/detect_compose.sh
@@ -103,8 +104,15 @@ model-rm: ## Remove a model (usage: make model-rm model=bge-m3)
 # Development
 # ==============================================================================
 
-run: ## Start the API server locally (requires compose services running)
-	uv run uvicorn src.normacore.api:app --reload --host 0.0.0.0 --port 8000
+dev: ## Start the API server locally with hot reload (requires compose services running)
+	uv run normacore-api --host 0.0.0.0 --port 8000 --reload
+
+# ==============================================================================
+# Production
+# ==============================================================================
+
+run: ## Start the API server (requires compose services running)
+	uv run normacore-api
 
 # ==============================================================================
 # Ingestion & Evaluation
@@ -126,10 +134,22 @@ test: ## Run unit tests
 test-cov: ## Run unit tests with coverage
 	uv run pytest tests/ -v --cov=src --cov-report=term-missing
 
-test-ingestion: ## Testing ingestion with demo corpus
+test-ingestion: ## Testing ingestion with demo corpus (requires make compose-dev)
 	make ingest CORPUS=test-corpus
-test-eval: test-ingestion ## Testing eval after ingestion with demo corpus
+
+test-eval: test-ingestion ## Testing eval after ingestion with demo corpus (requires make compose-dev)
 	make eval CORPUS=test-corpus
+
+test-api: ## Smoke test the running API service (requires make compose-dev + make test-ingestion) [API_PORT=8000]
+	@echo "--- GET /health ---" && \
+	curl -sf http://localhost:$(API_PORT)/health | python3 -m json.tool && \
+	echo "--- GET /corpora ---" && \
+	curl -sf http://localhost:$(API_PORT)/corpora | python3 -m json.tool && \
+	echo "--- POST /retrieve ---" && \
+	curl -sf -X POST http://localhost:$(API_PORT)/retrieve \
+	  -H "Content-Type: application/json" \
+	  -d '{"corpus_id": "test-corpus", "query": "What is the scope?"}' | python3 -m json.tool
+
 
 # ==============================================================================
 # Code Quality

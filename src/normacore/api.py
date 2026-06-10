@@ -6,17 +6,18 @@ Exposes three endpoints:
 - GET  /health    — liveness healthcheck
 """
 
+import argparse
 import logging
 import time
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from normacore.config import settings
 from normacore.embedding import EmbeddingClient
 from normacore.logging import configure_logging
 from normacore.vector_store import QdrantVectorStore
 
-configure_logging("logs/api.log")
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
@@ -179,3 +180,50 @@ async def health() -> HealthResponse:
         HealthResponse with status 'ok'.
     """
     return HealthResponse(status="ok")
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments.
+
+    Returns:
+        Parsed arguments namespace with host, port, and reload flag.
+    """
+    parser = argparse.ArgumentParser(description="Start the NormaCore API server.")
+    parser.add_argument(
+        "--host",
+        type=str,
+        default=settings.api_host,
+        help="Host to bind the server to (default: from API_HOST env var).",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=settings.api_port,
+        help="Port to bind the server to (default: from API_PORT env var).",
+    )
+    parser.add_argument(
+        "--reload",
+        action="store_true",
+        default=False,
+        help="Enable hot reload for development (do not use in production).",
+    )
+    return parser.parse_args()
+
+
+def main() -> None:
+    """Entry point for the API server."""
+    import uvicorn
+
+    configure_logging(settings.log_file, settings.log_level)
+    args = parse_args()
+
+    uvicorn.run(
+        "normacore.api:app",
+        host=args.host,
+        port=args.port,
+        reload=args.reload,
+    )
+
+
+if __name__ == "__main__":
+    main()
