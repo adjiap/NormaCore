@@ -56,7 +56,7 @@ def load_manifest(manifest_path: Path) -> dict:
     return manifest
 
 
-async def ingest_corpus(manifest_path: Path, corpus_id: str) -> None:
+async def ingest_corpus(manifest_path: Path, corpus_id: str) -> int:
     """Ingest a corpus from a manifest file into Qdrant.
 
     Reads each source document, chunks it, embeds all chunks in a
@@ -67,6 +67,9 @@ async def ingest_corpus(manifest_path: Path, corpus_id: str) -> None:
         manifest_path: Path to the corpus.yaml manifest file.
         corpus_id: Corpus identifier to ingest. Must match a corpus_id
             in the manifest.
+
+    Returns:
+        Total number of chunks upserted across all sources in the corpus.
 
     Raises:
         FileNotFoundError: If the manifest or a source file does not exist.
@@ -155,6 +158,7 @@ async def ingest_corpus(manifest_path: Path, corpus_id: str) -> None:
         corpus_id,
         total_chunks,
     )
+    return total_chunks
 
 
 def parse_args() -> argparse.Namespace:

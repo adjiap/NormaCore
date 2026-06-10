@@ -1,6 +1,7 @@
 """FastAPI application for NormaCore retrieval service.
 
-Exposes three endpoints:
+Exposed endpoints:
+- POST /v1/ingest    — ingest a corpus and return total chunks
 - POST /v1/retrieve  — query a corpus and return ranked chunks
 - GET  /v1/corpora   — list available corpora
 - GET  /v1/health    — liveness healthcheck
@@ -9,12 +10,14 @@ Exposes three endpoints:
 import argparse
 import logging
 import time
+from pathlib import Path
 
 from fastapi import APIRouter, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from normacore.config import settings
 from normacore.embedding import EmbeddingClient
+from normacore.ingest import ingest_corpus
 from normacore.logging import configure_logging
 from normacore.vector_store import QdrantVectorStore
 
@@ -79,6 +82,31 @@ class HealthResponse(BaseModel):
     """
 
     status: str
+
+
+class IngestRequest(BaseModel):
+    """Request body for POST /v1/ingest.
+
+    Attributes:
+        corpus_id: Corpus identifier to ingest. Must match a corpus_id
+            in the corresponding corpora/<corpus_id>/corpus.yaml manifest.
+    """
+
+    corpus_id: str
+
+
+class IngestResponse(BaseModel):
+    """Response body for POST /v1/ingest.
+
+    Attributes:
+        corpus_id: The corpus that was ingested.
+        chunks_indexed: Total number of chunks upserted into the vector store.
+        elapsed_ms: Total ingestion time in milliseconds.
+    """
+
+    corpus_id: str
+    chunks_indexed: int
+    elapsed_ms: float
 
 
 @router.post("/retrieve", response_model=RetrieveResponse)
@@ -181,6 +209,60 @@ async def health() -> HealthResponse:
         HealthResponse with status 'ok'.
     """
     return HealthResponse(status="ok")
+
+
+@router.post("/ingest", response_model=IngestResponse)
+async def ingest(request: IngestRequest) -> IngestResponse:
+    """Ingest a corpus from its manifest into the vector store.
+
+    Resolves the manifest path as corpora/<corpus_id>/corpus.yaml relative
+    to the working directory. Re-running is idempotent — the collection is
+    recreated from scratch on each call.
+
+    Args:
+        request: Ingest request containing the corpus_id to ingest.
+
+    Returns:
+        IngestResponse with corpus_id, chunks indexed, and elapsed time.
+
+    Raises:
+        HTTPException: 404 if the corpus manifest does not exist.
+        HTTPException: 500 if the embedding service or vector store is
+            unavailable during ingestion.
+    """
+    manifest_path = Path("corpora") / request.corpus_id / "corpus.yaml"
+
+    if not manifest_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Manifest not found for corpus '%s'." % request.corpus_id,
+        )
+
+    logger.info("Ingest request — corpus: %s", request.corpus_id)
+    start = time.perf_counter()
+
+    try:
+        chunks_indexed = await ingest_corpus(manifest_path, request.corpus_id)
+    except Exception as exc:
+        logger.exception("Ingestion error for corpus '%s': %s", request.corpus_id, exc)
+        raise HTTPException(
+            status_code=500,
+            detail="Ingestion failed for corpus '%s'." % request.corpus_id,
+        ) from exc
+
+    elapsed_ms = (time.perf_counter() - start) * 1000
+    logger.info(
+        "Ingest complete — corpus: %s, chunks: %s, time: %.1fms",
+        request.corpus_id,
+        chunks_indexed,
+        elapsed_ms,
+    )
+
+    return IngestResponse(
+        corpus_id=request.corpus_id,
+        chunks_indexed=chunks_indexed,
+        elapsed_ms=elapsed_ms,
+    )
 
 
 app.include_router(router)
