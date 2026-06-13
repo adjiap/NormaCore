@@ -36,6 +36,21 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   (copied to `compose.override.yaml` by `make setup`)
 - `Makefile` — added `compose-dev`, `test-ingestion`, `test-eval` targets
 
+#### API
+
+- `src/normacore/api.py` — FastAPI application with four endpoints:
+  `POST /v1/ingest`, `POST /v1/retrieve`, `GET /v1/corpora`, `GET /v1/health`
+- `compose.yaml` — `rag` service added with Dockerfile, healthcheck, and
+  corpora volume mount
+- `Dockerfile` — production image for the NormaCore API service
+
+#### Documentation
+
+- `docs/` — ProperDocs site scaffolded with ProperDocs + Material theme
+- `docs/index.md` — landing page
+- `docs/getting-started/` — requirements, quick start, and configuration pages
+- `properdocs.yaml` — site configuration with callouts, mkdocstrings, section-index
+
 ### Fixed
 
 - `EmbeddingResponse` field renamed from `embedding` to `embeddings` to match
@@ -48,13 +63,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   deployment no longer exposes Qdrant or Ollama ports to the host
 - API routes prefixed with `/v1/` — all endpoints now at `/v1/retrieve`,
   `/v1/corpora`, `/v1/health`, etc.
+- Healthcheck path updated to `/v1/health` after API route prefix change
+- Compose service renamed from `api` to `rag`; image now tagged `normacore-rag`
+- `test-ingestion` and `test-eval` Makefile targets removed — replaced by
+  `make ingest` (API-driven) and `make eval` (CLI with injected localhost URLs)
+- Corpora mount path made configurable via `LOCAL_CORPORA_PATH` in `.env`
 
 ### Known Limitations
 
 - Sparse/hybrid RRF retrieval not functional — BGE-M3 sparse vectors not
   exposed by Ollama; dense-only search used; Qdrant native BM25 deferred
 - Markdown ingestion only — PDF support planned for v0.2.0
-- No HTTP retrieval API (`POST /retrieve`) — planned for v0.2.0
 - No reranking, query rewriting, or authentication
 
 ## [0.1.0-dev] — 2026-06-03
