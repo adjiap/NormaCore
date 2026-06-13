@@ -34,6 +34,13 @@ dev = [
     "pytest-cov>=7.1.0",
     "ruff>=0.15.16",
 ]
+docs = [
+    "mkdocs-callouts>=1.16.1",
+    "mkdocs-material>=9.7.6",
+    "mkdocs-section-index>=0.3.12",
+    "mkdocstrings[python]>=1.0.4",
+    "properdocs>=1.6.7",
+]
 
 [project.scripts]
 normacore-ingest = "normacore.ingest:main"
