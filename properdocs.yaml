@@ -1,0 +1,89 @@
+# ==============================================================================
+# NormaCore — MkDocs Configuration
+# Documentation: https://www.mkdocs.org/
+# Theme: https://squidfunk.github.io/mkdocs-material/
+# ==============================================================================
+
+# Site metadata — used in the browser tab, SEO, and GitHub Pages deployment
+site_name: NormaCore
+site_url: https://adjiap.github.io/normacore
+site_description: Self-hostable RAG ingestion and retrieval platform for structured documents
+site_author: adjiap
+repo_url: https://github.com/adjiap/normacore
+repo_name: adjiap/normacore
+
+# Copyright footer shown at the bottom of every page
+copyright: Copyright &copy; 2026 adjiap — Apache-2.0 License
+
+# ==============================================================================
+# Theme — Material for MkDocs
+# ==============================================================================
+theme:
+  name: material
+
+  # Light/dark mode toggle
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  # UI feature flags
+  features:
+    - navigation.tabs          # top-level sections as tabs
+    - navigation.sections      # groups pages under section headers in sidebar
+    - navigation.expand        # expand all sections by default
+    - navigation.top           # back-to-top button
+    - toc.integrate            # merge table of contents into sidebar
+    - content.code.copy        # copy button on all code blocks
+    - content.code.annotate    # inline code annotations
+
+# ==============================================================================
+# Plugins
+# ==============================================================================
+plugins:
+  - search        # Built-in full-text search
+  - callouts      # Converts Obsidian/GitHub-flavoured callouts (> [!NOTE]) into mkdocs admonitions
+
+  # Auto-generates API reference pages from Python docstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]          # where to find the normacore package
+          options:
+            show_source: true   # show source code link on each item
+            show_root_heading: true
+
+  - section-index # Makes section index pages (e.g. getting-started/index.md) clickable
+
+# ==============================================================================
+# Markdown extensions — extend standard Markdown with extra syntax
+# ==============================================================================
+markdown_extensions:
+  - admonition                 # base support for admonition blocks
+  - pymdownx.details           # collapsible admonition blocks (??? note)
+  - pymdownx.superfences       # fenced code blocks inside admonitions
+  - pymdownx.highlight:        # syntax highlighting for code blocks
+      anchor_linenums: true
+  - pymdownx.inlinehilite      # inline code syntax highlighting
+  - pymdownx.snippets          # include content from other files
+  - pymdownx.tabbed:           # tabbed content blocks
+      alternate_style: true
+  - toc:                       # table of contents generation
+      permalink: true          # adds anchor links to headings
+
+# ==============================================================================
+# Navigation — defines the full page hierarchy shown in the sidebar
+# ==============================================================================
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Requirements: getting-started/requirements.md
+    - Quick Start: getting-started/quick-start.md
+    - Configuration: getting-started/configuration.md

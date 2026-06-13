@@ -172,3 +172,16 @@ clean: ## Remove containers and volumes — WARNING: deletes all index data
 	COMPOSE=$$($(DETECT_COMPOSE)) && \
 	$$COMPOSE -f compose.yaml --profile cpu --profile gpu-docker --profile gpu-podman \
 	    down --volumes --remove-orphans
+
+# ==============================================================================
+# Documentation
+# ==============================================================================
+
+docs-serve: ## Serve documentation locally (http://localhost:8080)
+	uv sync --group docs && uv run properdocs serve -a localhost:8080
+
+docs-build: ## Build documentation site to site/
+	uv sync --group docs && uv run properdocs build
+
+docs-deploy: ## Deploy documentation to GitHub Pages
+	uv sync --group docs && uv run properdocs gh-deploy --force
