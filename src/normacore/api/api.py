@@ -16,7 +16,7 @@ from fastapi import APIRouter, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from normacore.config import settings
-from normacore.ingest import ingest_corpus
+from normacore.ingestion.ingest import ingest_corpus
 from normacore.logging import configure_logging
 from normacore.retrieval.embedding import EmbeddingClient
 from normacore.retrieval.vector_store import QdrantVectorStore

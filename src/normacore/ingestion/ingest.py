@@ -19,10 +19,10 @@ from pathlib import Path
 
 import yaml
 
-from normacore.chunker import Chunker
 from normacore.config import settings
+from normacore.ingestion.chunker import Chunker
+from normacore.ingestion.readers.markdown_reader import MarkdownReader
 from normacore.logging import configure_logging
-from normacore.markdown_reader import MarkdownReader
 from normacore.retrieval.embedding import EmbeddingClient
 from normacore.retrieval.vector_store import QdrantVectorStore
 

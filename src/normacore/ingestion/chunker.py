@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 
-from normacore.markdown_reader import MarkdownSection
+from normacore.ingestion.readers.markdown_reader import MarkdownSection
 
 logger = logging.getLogger(__name__)
 

@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from normacore.markdown_reader import MarkdownReader, MarkdownSection
+from normacore.ingestion.readers.markdown_reader import MarkdownReader, MarkdownSection
 
-FIXTURES = Path(__file__).parent / "fixtures"
+FIXTURES = Path(__file__).parent.parent / "fixtures"
 
 
 @pytest.fixture()

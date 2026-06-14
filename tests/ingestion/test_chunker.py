@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from normacore.chunker import Chunk, Chunker
-from normacore.markdown_reader import MarkdownReader
+from normacore.ingestion.chunker import Chunk, Chunker
+from normacore.ingestion.readers.markdown_reader import MarkdownReader
 
-FIXTURES = Path(__file__).parent / "fixtures"
+FIXTURES = Path(__file__).parent.parent / "fixtures"
 
 
 @pytest.fixture
@@ -114,7 +114,7 @@ class TestChunk:
 
     def test_chunk_empty_section_skipped(self, chunker):
         """Sections with empty body text produce no chunks."""
-        from normacore.markdown_reader import MarkdownSection
+        from normacore.ingestion.readers.markdown_reader import MarkdownSection
 
         sections = [
             MarkdownSection(

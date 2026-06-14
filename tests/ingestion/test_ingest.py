@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from normacore.ingest import ingest_corpus, load_manifest
+from normacore.ingestion.ingest import ingest_corpus, load_manifest
 
 
 @pytest.fixture
@@ -63,7 +63,7 @@ class TestIngestCorpus:
     @pytest.fixture
     def mock_vector_store(self):
         """Provide a mocked QdrantVectorStore."""
-        with patch("normacore.ingest.QdrantVectorStore") as mock:
+        with patch("normacore.ingestion.ingest.QdrantVectorStore") as mock:
             instance = AsyncMock()
             mock.return_value = instance
             yield instance
@@ -71,7 +71,7 @@ class TestIngestCorpus:
     @pytest.fixture
     def mock_embedding_client(self):
         """Provide a mocked EmbeddingClient."""
-        with patch("normacore.ingest.EmbeddingClient") as mock:
+        with patch("normacore.ingestion.ingest.EmbeddingClient") as mock:
             instance = AsyncMock()
             instance.embed.return_value = [[0.1] * 1024]
             mock.return_value = instance
