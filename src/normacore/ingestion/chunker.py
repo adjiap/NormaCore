@@ -2,7 +2,7 @@
 
 Chunking strategies applied in order:
 
-1. Structure-aware split — one chunk per MarkdownSection (happy path).
+1. Structure-aware split — one chunk per DocumentSection (happy path).
    Heading path is carried into each chunk as contextual metadata.
 2. Recursive fallback — if a section body exceeds the token limit, split
    on paragraph boundaries (\\n\\n), then sentence boundaries. Overlap of
@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 
-from normacore.ingestion.readers.markdown_reader import MarkdownSection
+from normacore.ingestion.readers.markdown import DocumentSection
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ class Chunk:
 
 
 class Chunker:
-    """Converts a list of MarkdownSection objects into embeddable chunks.
+    """Converts a list of DocumentSection objects into embeddable chunks.
 
     Args:
         max_tokens: Maximum tokens per chunk before recursive fallback
@@ -81,7 +81,7 @@ class Chunker:
 
     def _chunk_section(
         self,
-        section: MarkdownSection,
+        section: DocumentSection,
         start_index: int,
     ) -> list[Chunk]:
         """Produce one or more chunks from a single section.
@@ -90,7 +90,7 @@ class Chunker:
         fallback if needed.
 
         Args:
-            section: The source MarkdownSection.
+            section: The source DocumentSection.
             start_index: chunk_index offset for the first chunk produced.
 
         Returns:
@@ -162,7 +162,7 @@ class Chunker:
     def _split_recursive(
         self,
         text: str,
-        section: MarkdownSection,
+        section: DocumentSection,
         start_index: int,
     ) -> list[Chunk]:
         """Recursively split oversized text into overlapping chunks.
@@ -233,11 +233,11 @@ class Chunker:
         )
         return chunks
 
-    def chunk(self, sections: list[MarkdownSection]) -> list[Chunk]:
+    def chunk(self, sections: list[DocumentSection]) -> list[Chunk]:
         """Convert a flat list of sections into embeddable chunks.
 
         Args:
-            sections: Ordered list of MarkdownSection objects from the reader.
+            sections: Ordered list of DocumentSection objects from the reader.
 
         Returns:
             Flat list of Chunk objects with index, text, and metadata.

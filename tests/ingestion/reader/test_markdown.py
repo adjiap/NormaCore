@@ -4,9 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from normacore.ingestion.readers.markdown_reader import MarkdownReader, MarkdownSection
+from normacore.ingestion.readers.base import DocumentSection
+from normacore.ingestion.readers.markdown import MarkdownReader
 
-FIXTURES = Path(__file__).parent.parent / "fixtures"
+FIXTURES = Path(__file__).parent.parent.parent / "fixtures"
 
 
 @pytest.fixture()
@@ -16,7 +17,7 @@ def reader() -> MarkdownReader:
 
 
 @pytest.fixture
-def sample_sections(reader) -> list[MarkdownSection]:
+def sample_sections(reader) -> list[DocumentSection]:
     """Parse the sample standard fixture."""
     return reader.read(FIXTURES / "sample_standard.md")
 
@@ -71,9 +72,9 @@ class TestGenerateSectionID:
 
 class TestRead:
     def test_read_returns_sections(self, sample_sections):
-        """read() returns a non-empty list of MarkdownSection objects."""
+        """read() returns a non-empty list of DocumentSection objects."""
         assert len(sample_sections) > 0
-        assert all(isinstance(s, MarkdownSection) for s in sample_sections)
+        assert all(isinstance(s, DocumentSection) for s in sample_sections)
 
     def test_read_section_ids_extracted(self, sample_sections):
         """Sections with numeric prefixes have extracted section_ids."""

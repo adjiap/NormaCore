@@ -19,8 +19,9 @@ sibling index (e.g. "2.3.1").
 
 import logging
 import re
-from dataclasses import dataclass, field
 from pathlib import Path
+
+from normacore.ingestion.readers.base import DocumentSection
 
 logger = logging.getLogger(__name__)
 
@@ -29,45 +30,8 @@ logger = logging.getLogger(__name__)
 _SECTION_ID_RE = re.compile(r"^(\d+(\.\d+)*|[A-Z](\.\d+)*)\s")
 
 
-@dataclass
-class MarkdownSection:
-    """Normalised intermediate representation of a single document section.
-
-    Attributes:
-        section_id: Clause identifier, either extracted from heading text
-            (patterns A-C) or generated positionally (pattern D).
-        heading_path: Ordered list of ancestor heading texts including this
-            heading, from root to current level.
-        heading_level: Markdown heading depth (1 = #, 2 = ##, etc.).
-        text: Body text of the section, excluding the heading line itself.
-        metadata: Arbitrary key/value pairs set by the caller (source file,
-            corpus_id, etc.).
-    """
-
-    section_id: str
-    heading_path: list[str]
-    heading_level: int
-    text: str
-    metadata: dict = field(default_factory=dict)
-
-    def to_dict(self) -> dict:
-        """Serialise to a plain dict for downstream consumers.
-
-        Returns:
-            Dict with section_id, heading_path, heading_level, text,
-            and metadata keys.
-        """
-        return {
-            "section_id": self.section_id,
-            "heading_path": self.heading_path,
-            "heading_level": self.heading_level,
-            "text": self.text,
-            "metadata": self.metadata,
-        }
-
-
 class MarkdownReader:
-    """Parses a Markdown file into a list of MarkdownSection objects.
+    """Parses a Markdown file into a list of DocumentSection objects.
 
     Heading detection uses ATX-style headers only (# through ######).
     Setext-style headers (underline with === or ---) are not supported.
@@ -119,7 +83,7 @@ class MarkdownReader:
 
         return ".".join(str(c) for c in counters[:level])
 
-    def read(self, path: Path, metadata: dict | None = None) -> list[MarkdownSection]:
+    def read(self, path: Path, metadata: dict | None = None) -> list[DocumentSection]:
         """Parse a Markdown file and return a list of sections.
 
         Args:
@@ -128,7 +92,7 @@ class MarkdownReader:
                 (e.g. corpus_id, source name).
 
         Returns:
-            Ordered list of MarkdownSection objects, one per heading.
+            Ordered list of DocumentSection objects, one per heading.
 
         Raises:
             FileNotFoundError: If path does not exist.
@@ -144,7 +108,7 @@ class MarkdownReader:
         raw = path.read_text(encoding="utf-8")
         lines = raw.splitlines()
 
-        sections: list[MarkdownSection] = []
+        sections: list[DocumentSection] = []
         heading_stack: list[str] = []  # tracks heading path up to current level
         counters: list[int] = []  # positional counters for pattern D
         current_heading: str | None = None
@@ -166,7 +130,7 @@ class MarkdownReader:
             heading_stack.append(heading.strip())
 
             sections.append(
-                MarkdownSection(
+                DocumentSection(
                     section_id=section_id,
                     heading_path=list(heading_stack),
                     heading_level=level,
