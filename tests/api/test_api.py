@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from normacore.api import app
+from normacore.api.api import app
 
 BASE_URL = "http://test"
 
@@ -13,7 +13,7 @@ BASE_URL = "http://test"
 @pytest.fixture
 def mock_embedding_client():
     """Provide a mocked EmbeddingClient."""
-    with patch("normacore.api.EmbeddingClient") as mock:
+    with patch("normacore.api.api.EmbeddingClient") as mock:
         instance = AsyncMock()
         instance.embed.return_value = [[0.1] * 1024]
         mock.return_value = instance
@@ -23,7 +23,7 @@ def mock_embedding_client():
 @pytest.fixture
 def mock_vector_store():
     """Provide a mocked QdrantVectorStore."""
-    with patch("normacore.api.QdrantVectorStore") as mock:
+    with patch("normacore.api.api.QdrantVectorStore") as mock:
         instance = AsyncMock()
         instance.search_hybrid.return_value = [
             {
@@ -176,7 +176,7 @@ class TestIngest:
     async def test_ingest_returns_response(self, client, mock_vector_store):
         """POST /v1/ingest returns corpus_id, chunks_indexed, and elapsed_ms."""
         with patch(
-            "normacore.api.ingest_corpus", new_callable=AsyncMock
+            "normacore.api.api.ingest_corpus", new_callable=AsyncMock
         ) as mock_ingest:
             mock_ingest.return_value = 10
             async with client as c:
@@ -204,10 +204,10 @@ class TestIngest:
     async def test_ingest_ingestion_error_returns_500(self, client):
         """POST /v1/ingest returns 500 when ingestion fails."""
         with patch(
-            "normacore.api.ingest_corpus", new_callable=AsyncMock
+            "normacore.api.api.ingest_corpus", new_callable=AsyncMock
         ) as mock_ingest:
             mock_ingest.side_effect = Exception("embedding timeout")
-            with patch("normacore.api.Path.exists", return_value=True):
+            with patch("normacore.api.api.Path.exists", return_value=True):
                 async with client as c:
                     response = await c.post(
                         "/v1/ingest",

@@ -304,7 +304,7 @@ def main() -> None:
     args = parse_args()
 
     uvicorn.run(
-        "normacore.api:app",
+        "normacore.api.api:app",
         host=args.host,
         port=args.port,
         reload=args.reload,

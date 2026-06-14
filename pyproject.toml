@@ -45,7 +45,7 @@ docs = [
 [project.scripts]
 normacore-ingest = "normacore.ingest:main"
 normacore-eval = "normacore.eval:main"
-normacore-api = "normacore.api:main"
+normacore-api = "normacore.api.api:main"
 
 [tool.black]
 line-length = 88
