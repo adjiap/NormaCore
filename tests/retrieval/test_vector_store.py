@@ -4,13 +4,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from normacore.vector_store import QdrantVectorStore
+from normacore.retrieval.vector_store import QdrantVectorStore
 
 
 @pytest.fixture
 def mock_qdrant_client():
     """Provide a mocked AsyncQdrantClient."""
-    with patch("normacore.vector_store.AsyncQdrantClient") as mock:
+    with patch("normacore.retrieval.vector_store.AsyncQdrantClient") as mock:
         mock.return_value = AsyncMock()
         yield mock.return_value
 

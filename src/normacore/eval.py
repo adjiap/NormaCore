@@ -24,9 +24,9 @@ from pathlib import Path
 import yaml
 
 from normacore.config import settings
-from normacore.embedding import EmbeddingClient
 from normacore.logging import configure_logging
-from normacore.vector_store import QdrantVectorStore
+from normacore.retrieval.embedding import EmbeddingClient
+from normacore.retrieval.vector_store import QdrantVectorStore
 
 logger = logging.getLogger(__name__)
 

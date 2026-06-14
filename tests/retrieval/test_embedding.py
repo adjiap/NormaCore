@@ -4,13 +4,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from normacore.embedding import EmbeddingClient
+from normacore.retrieval.embedding import EmbeddingClient
 
 
 @pytest.fixture
 def mock_httpx_client():
     """Provide a mocked httpx.AsyncClient."""
-    with patch("normacore.embedding.httpx.AsyncClient") as mock:
+    with patch("normacore.retrieval.embedding.httpx.AsyncClient") as mock:
         client_instance = AsyncMock()
         mock.return_value.__aenter__ = AsyncMock(return_value=client_instance)
         mock.return_value.__aexit__ = AsyncMock(return_value=False)
