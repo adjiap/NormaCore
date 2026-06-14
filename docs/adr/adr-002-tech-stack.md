@@ -253,6 +253,82 @@ reviewed in detail. MinerU's capabilities are strong (VLM + OCR dual engine,
 as compatible, it could be a strong alternative to Docling. Flagged for
 monitoring and legal review if needed.
 
+### 5.3 Embedded visual content — images and tables
+
+This section records decisions on visual content found inside ingested
+documents. These decisions apply to all current and planned format phases
+(Markdown, PDF, DOCX).
+
+#### 5.3.1 Embedded images
+
+Decision: extract and index the caption and immediately surrounding text
+only. Image pixels are not stored, described, or embedded.
+
+Rationale: for normative technical standards (ISO 26262, MIL-STD-882E,
+and similar), figures are almost always accompanied by a caption and
+surrounded by explanatory prose. The retrieval value is in that text, not
+the visual content itself. Generating VLM descriptions of figures during
+ingestion adds per-image inference cost, introduces hallucination risk in
+stored metadata, and has not been shown to improve Recall@5 or MRR on
+this corpus type.
+
+Docling extracts captions and figure references as part of its layout
+analysis output. The `pdf.py` reader (v0.2.0) will preserve this text in
+the `DocumentSection` IR and pass it to the chunker alongside surrounding
+prose. No additional step is required.
+
+Revisit trigger: eval harness shows systematic misses on figure-heavy
+sections that cannot be explained by caption quality alone.
+
+Out of scope until explicitly revisited:
+
+- VLM-based image description stored as retrievable text
+- Image pixel storage or visual embedding
+- Standalone image ingestion (e.g. `.png`, `.jpg` files as corpus sources)
+- Visual search or multimodal retrieval
+
+#### 5.3.2 Tables
+
+Decision: preserve table structure as inline Markdown text. No special
+chunking or relational representation.
+
+For **PDF sources**, Docling extracts tables with row/column structure and
+renders them as Markdown tables in its output. This passes through the IR
+unchanged and is embedded as part of the containing section's text.
+
+For **Markdown sources**, the reader already captures raw Markdown table
+syntax as part of the section body. No transformation is applied.
+
+In both cases the chunker treats table text the same as prose. A table
+that exceeds the token limit triggers the standard recursive fallback
+(paragraph split, then sentence split). This is a known limitation: a
+large table split mid-row loses structural coherence. It is accepted for
+v0.1.0–v0.2.0 given that most normative tables in technical standards fit
+within the 512-token limit.
+
+Revisit trigger: eval harness shows retrieval failures on table-heavy
+sections, or a consuming project reports citation errors tracing back to
+split table rows.
+
+Out of scope until explicitly revisited:
+
+- Table-aware chunking (split on row boundaries, not token count)
+- Relational or structured table storage
+- Table-to-text normalisation (e.g. flattening a matrix into sentences)
+
+#### 5.3.3 OCR for scanned content
+
+Decision: out of scope. NormaCore targets *authored* structured documents
+— PDFs produced from digital source files, not scanned paper documents.
+
+Docling exposes an OCR fallback flag but it is not enabled by default and
+has not been tested against NormaCore's eval harness. Enabling it
+introduces a separate quality dimension (OCR accuracy) that the current
+harness does not measure.
+
+Revisit trigger: a corpus operator explicitly needs scanned document
+support and is willing to author eval fixtures covering OCR output quality.
+
 ## 6. Retrieval orchestration — lean, not a framework
 
 Decision: implement retrieval as project code, not via LlamaIndex, LangChain,
@@ -380,6 +456,9 @@ All primary components are MIT or Apache-2.0. No copyleft in the core stack.
 - DOCX / PPTX ingestion (future format phase; Docling supports them).
 - CI/CD pipeline configuration.
 - Monitoring and observability stack.
+- Embedded image description (VLM inference on figures; see §5.4)
+- Standalone image ingestion and visual retrieval
+- OCR for scanned documents (Docling OCR flag available but untested and disabled by default)
 
 ## 11. Open items
 
