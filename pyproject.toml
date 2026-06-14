@@ -9,7 +9,6 @@ description = "Self-hostable RAG ingestion and retrieval platform for structured
 authors = [
   { name = "adjiap", email = "20769489+adjiap@users.noreply.github.com" },
 ]
-readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }
 dependencies = [
