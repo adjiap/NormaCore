@@ -19,7 +19,7 @@ COPY uv.lock .
 COPY src/normacore/__init__.py src/normacore/__init__.py
 
 # Install runtime dependencies only (no dev deps)
-RUN uv sync --no-dev --frozen
+RUN uv sync --no-group dev --no-group docs --frozen
 
 # Copy application source
 COPY src/ src/
