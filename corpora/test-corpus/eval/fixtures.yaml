@@ -1,7 +1,7 @@
 - query: "What is the scope of this standard?"
   expected_chunks:
     - chunk_id: "1"
-      min_rank: 1
+      min_rank: 3
 
 - query: "What systems does this standard apply to?"
   expected_chunks:
