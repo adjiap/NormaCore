@@ -87,3 +87,6 @@ nav:
     - Requirements: getting-started/requirements.md
     - Quick Start: getting-started/quick-start.md
     - Configuration: getting-started/configuration.md
+  - Guides:
+    - Corpus Formatting: guides/corpus-format.md
+    - Evaluation Fixtures: guides/eval-fixtures.md
