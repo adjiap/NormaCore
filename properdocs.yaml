@@ -90,3 +90,4 @@ nav:
   - Guides:
     - Corpus Formatting: guides/corpus-format.md
     - Evaluation Fixtures: guides/eval-fixtures.md
+  - API Reference: api-reference.md
