@@ -48,7 +48,7 @@ compose: check ## Auto-detect GPU and start containers
 	@PROFILE=$$($(DETECT_GPU)) && \
 	COMPOSE=$$($(DETECT_COMPOSE)) && \
 	RUNTIME=$$($(DETECT_RUNTIME)) && \
-	[ "$$PROFILE" = "gpu" ] && PROFILE="$${PROFILE}-$${RUNTIME}" ; \
+	if [ "$$PROFILE" = "gpu" ]; then PROFILE="$${PROFILE}-$${RUNTIME}"; fi && \
 	echo "Starting with profile: $$PROFILE" && \
 	$$COMPOSE -f compose.yaml --profile $$PROFILE up -d
 
@@ -70,6 +70,15 @@ compose-gpu: check ## Force GPU mode (requires NVIDIA drivers + container toolki
 	PROFILE="gpu-$${RUNTIME}" && \
 	echo "Starting in GPU mode ($$PROFILE)..." && \
 	$$COMPOSE -f compose.yaml --profile $$PROFILE up -d
+
+compose-rebuild: check ## Force rebuild of rag image and repull of base images (no cache)
+	@PROFILE=$$($(DETECT_GPU)) && \
+	COMPOSE=$$($(DETECT_COMPOSE)) && \
+	RUNTIME=$$($(DETECT_RUNTIME)) && \
+	if [ "$$PROFILE" = "gpu" ]; then PROFILE="$${PROFILE}-$${RUNTIME}"; fi && \
+	echo "Rebuilding rag image (no cache) with profile: $$PROFILE" && \
+	$$COMPOSE -f compose.yaml build --no-cache rag && \
+	$$COMPOSE -f compose.yaml --profile $$PROFILE pull qdrant ollama-cpu ollama-gpu-docker ollama-gpu-podman
 
 compose-down: ## Stop all containers
 	@COMPOSE=$$($(DETECT_COMPOSE)) && \
