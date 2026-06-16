@@ -68,7 +68,11 @@ plugins:
 markdown_extensions:
   - admonition                 # base support for admonition blocks
   - pymdownx.details           # collapsible admonition blocks (??? note)
-  - pymdownx.superfences       # fenced code blocks inside admonitions
+  - pymdownx.superfences:      # fenced code blocks inside admonitions
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.highlight:        # syntax highlighting for code blocks
       anchor_linenums: true
   - pymdownx.inlinehilite      # inline code syntax highlighting
@@ -91,3 +95,4 @@ nav:
     - Corpus Formatting: guides/corpus-format.md
     - Evaluation Fixtures: guides/eval-fixtures.md
   - API Reference: api-reference.md
+  - Architecture: architecture.md
