@@ -5,24 +5,28 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] — 2026-06-16
 
 ### Added
 
 #### Core Pipeline
 
-- `src/normacore/embedding.py` — async Ollama `/api/embed` client with retry
-  logic and Pydantic response models
-- `src/normacore/vector_store.py` — `VectorStore` ABC and `QdrantVectorStore`
-  implementation with dense vector search
-- `src/normacore/markdown_reader.py` — structure-aware Markdown reader
-  supporting ISO/IEC, NIST, and unnumbered heading patterns
-- `src/normacore/chunker.py` — structure-aware chunker with glossary detection
-  and recursive fallback for oversized sections
-- `src/normacore/ingest.py` — corpus ingestion pipeline with batched embedding
-  and idempotent collection creation; `normacore-ingest` entry point
+- `src/normacore/retrieval/embedding.py` — async Ollama `/api/embed` client
+  with retry logic and Pydantic response models
+- `src/normacore/retrieval/vector_store.py` — `VectorStore` ABC and
+  `QdrantVectorStore` implementation with dense vector search
+- `src/normacore/ingestion/readers/base.py` — `DocumentSection` IR dataclass,
+  format-agnostic contract between all readers and the chunker
+- `src/normacore/ingestion/readers/markdown.py` — structure-aware Markdown
+  reader supporting ISO/IEC, NIST, and unnumbered heading patterns
+- `src/normacore/ingestion/chunker.py` — structure-aware chunker with glossary
+  detection and recursive fallback for oversized sections
+- `src/normacore/ingestion/ingest.py` — corpus ingestion pipeline with batched
+  embedding and idempotent collection creation; `normacore-ingest` entry point
 - `src/normacore/eval.py` — Recall@5 and MRR evaluation harness;
   `normacore-eval` entry point
+- `src/normacore/api/api.py` — FastAPI application with four endpoints:
+  `POST /v1/ingest`, `POST /v1/retrieve`, `GET /v1/corpora`, `GET /v1/health`
 
 #### Test Corpus
 
@@ -30,44 +34,61 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `corpora/test-corpus/corpus.yaml` — corpus manifest
 - `corpora/test-corpus/eval/fixtures.yaml` — 5 curated eval queries
 
+#### Infrastructure
+
+- `compose.yaml` — `rag` service with Dockerfile, healthcheck, and corpora
+  volume mount; Qdrant and Ollama services with CPU/GPU profiles
+- `Dockerfile` — production image; non-root user, `uv` managed deps
+- `compose.override.example.yaml` — dev-only port bindings template
+
 #### Developer Experience
 
-- `compose.override.example.yaml` — dev-only port bindings template
-  (copied to `compose.override.yaml` by `make setup`)
-- `Makefile` — added `compose-dev`, `test-ingestion`, `test-eval` targets
-
-#### API
-
-- `src/normacore/api.py` — FastAPI application with four endpoints:
-  `POST /v1/ingest`, `POST /v1/retrieve`, `GET /v1/corpora`, `GET /v1/health`
-- `compose.yaml` — `rag` service added with Dockerfile, healthcheck, and
-  corpora volume mount
-- `Dockerfile` — production image for the NormaCore API service
+- `Makefile` — `compose-dev`, `compose-rebuild` targets; `ingest` and `eval`
+  targets calling API and CLI respectively
+- `docs/assets/system-overview.png` — Excalidraw system overview diagram
 
 #### Documentation
 
-- `docs/` — ProperDocs site scaffolded with ProperDocs + Material theme
+- `docs/architecture.md` — system overview, ingestion/retrieval/eval pipeline
+  diagrams, deployment model, source layout, ADR links
+- `docs/guides/corpus-format.md` — corpus.yaml format, source fields,
+  ingestion, retrieval, corpus ID conventions
+- `docs/guides/eval-fixtures.md` — fixtures.yaml format, chunk_id mapping,
+  quality thresholds, fixture authoring guidance
+- `docs/api-reference.md` — endpoint summary, link to Swagger UI
+- `docs/getting-started/` — requirements, quick start, configuration pages
 - `docs/index.md` — landing page
-- `docs/getting-started/` — requirements, quick start, and configuration pages
-- `properdocs.yaml` — site configuration with callouts, mkdocstrings, section-index
+- `properdocs.yaml` — site configuration with Mermaid, callouts,
+  mkdocstrings, section-index
+- `docs/adr/adr-002-tech-stack.md` — §5.3 added: embedded image handling,
+  table representation, OCR scope decisions
 
 ### Fixed
 
 - `EmbeddingResponse` field renamed from `embedding` to `embeddings` to match
   Ollama `/api/embed` response schema
-- `search_hybrid` simplified to dense-only search; sparse `Prefetch` with raw
-  query text caused Qdrant 400 errors (sparse pipeline deferred to post-v0.1.0)
-- Healthchecks updated to `/dev/tcp` TCP probe — Qdrant image ships neither
-  `curl` nor `wget`
+- `search_hybrid` simplified to dense-only search; sparse `Prefetch` caused
+  Qdrant 400 errors; deferred to post-v0.1.0
+- Healthchecks updated to `/dev/tcp` TCP probe — Qdrant and Ollama images
+  ship neither `curl` nor `wget`
 - `compose.yaml` port bindings moved to `compose.override.yaml`; production
   deployment no longer exposes Qdrant or Ollama ports to the host
-- API routes prefixed with `/v1/` — all endpoints now at `/v1/retrieve`,
-  `/v1/corpora`, `/v1/health`, etc.
-- Healthcheck path updated to `/v1/health` after API route prefix change
-- Compose service renamed from `api` to `rag`; image now tagged `normacore-rag`
-- `test-ingestion` and `test-eval` Makefile targets removed — replaced by
-  `make ingest` (API-driven) and `make eval` (CLI with injected localhost URLs)
-- Corpora mount path made configurable via `LOCAL_CORPORA_PATH` in `.env`
+- API routes prefixed with `/v1/`
+- Healthcheck path updated to `/v1/health`
+- Compose service renamed from `api` to `rag`
+- Corpora mount path made configurable via `LOCAL_CORPORA_PATH`
+- `uvicorn.run()` app path corrected to `normacore.api.api:app` after
+  subpackage refactor
+- Dockerfile `uv sync` changed to `--no-group dev --no-group docs` —
+  `--no-dev` does not suppress `[dependency-groups]` in uv
+- `readme` field removed from `pyproject.toml` — `README.md` excluded by
+  `.dockerignore` caused hatchling build failure in Docker
+- `build-system` switched from `setuptools + setuptools_scm` to `hatchling`
+- `if` statement fix for GPU profile detection in `compose` and
+  `compose-rebuild` Makefile targets
+- `.pre-commit-config.yaml` `check-yaml` hook updated with `--unsafe` flag
+  to allow Python object tags in `properdocs.yaml`
+- Eval fixture `min_rank` for scope query loosened from 1 to 3
 
 ### Known Limitations
 
@@ -137,3 +158,6 @@ is in place.
 - `README.md` — project description, use cases, requirements, quick start,
   Makefile reference, project structure, ADR links
 - `CHANGELOG.md` — this file
+
+[0.1.0]: https://github.com/adjiap/normacore/compare/v0.1.0-dev...v0.1.0
+[0.1.0-dev]: https://github.com/adjiap/normacore/releases/tag/v0.1.0-dev

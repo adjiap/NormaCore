@@ -11,8 +11,8 @@ pipelines across projects.
 1. Ingests structured documents (Markdown, PDF) into a namespaced vector index
 2. Chunks documents structure-first — on heading and clause boundaries, with
    heading path carried into every chunk as metadata
-3. Retrieves ranked chunks over HTTP using hybrid dense + sparse search (BGE-M3
-   + Qdrant RRF fusion)
+3. Retrieves ranked chunks over HTTP using dense search (BGE-M3 + Qdrant);
+   hybrid sparse/RRF planned for v0.2.0
 4. Verifies retrieval quality per corpus with a built-in eval harness
    (`Recall@5 ≥ 0.85`, `MRR ≥ 0.70`) before any consumer depends on it
 
