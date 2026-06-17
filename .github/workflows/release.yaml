@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/normacore-rag
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  docs:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.12"
+
+      - name: Install docs dependencies
+        run: uv sync --group docs
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Deploy docs
+        run: uv run properdocs gh-deploy --force
+
+  container:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
