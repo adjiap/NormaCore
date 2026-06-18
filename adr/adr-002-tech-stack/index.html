@@ -1,0 +1,1415 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Self-hostable RAG ingestion and retrieval platform for structured documents">
+      
+      
+        <meta name="author" content="adjiap">
+      
+      
+        <link rel="canonical" href="https://adjiap.github.io/normacore/adr/adr-002-tech-stack/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-ProperDocs 1.6.7, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>ADR-002: Tech Stack — Shared RAG Ingestion and Retrieval Platform - NormaCore</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adr-002-tech-stack-shared-rag-ingestion-and-retrieval-platform" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="NormaCore" class="md-header__button md-logo" aria-label="NormaCore" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NormaCore
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ADR-002: Tech Stack — Shared RAG Ingestion and Retrieval Platform
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/adjiap/normacore" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    adjiap/normacore
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/requirements/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/corpus-format/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api-reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../architecture/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NormaCore" class="md-nav__button md-logo" aria-label="NormaCore" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    NormaCore
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/adjiap/normacore" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    adjiap/normacore
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/corpus-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpus Formatting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/eval-fixtures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation Fixtures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adr-002-tech-stack-shared-rag-ingestion-and-retrieval-platform">ADR-002: Tech Stack — Shared RAG Ingestion and Retrieval Platform<a class="headerlink" href="#adr-002-tech-stack-shared-rag-ingestion-and-retrieval-platform" title="Permanent link">&para;</a></h1>
+<ul>
+<li>Status: Proposed</li>
+<li>Date: 2026-06-02</li>
+<li>Deciders: Project owner (single-developer greenfield)</li>
+<li>Builds on: ADR-001 (system architecture, design principles, licensing boundary
+  rule)</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This ADR decides <strong>what the platform is built with</strong>. ADR-001 decides <strong>what
+it does and why</strong>. The two are designed to be read together.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>License compliance is a hard constraint (ADR-001 §3, NFR-3). Every component
+below has been verified against its canonical license source. Components with
+copyleft licenses are documented as fallbacks with the required isolation
+pattern (ADR-001 §3.1), never as primary choices.</p>
+</div>
+<h2 id="1-context">1. Context<a class="headerlink" href="#1-context" title="Permanent link">&para;</a></h2>
+<p>ADR-001 defines the platform as a self-hostable, domain-agnostic, HTTP-native
+ingestion and retrieval service. This ADR selects the concrete technologies to
+implement it, guided by these constraints from ADR-001:</p>
+<ul>
+<li>Permissively licensed core (NFR-3).</li>
+<li>Air-gap capable, no cloud dependency at runtime (NFR-1).</li>
+<li>Single-machine deployable (NFR-5).</li>
+<li>All heavy components reached over HTTP (ADR-001 §6.2), so the stack must
+  support multiple deployment topologies without code changes.</li>
+</ul>
+<p>Where prior analysis from an adjacent project informed a decision, the
+reasoning has been re-evaluated from first principles for this platform's
+context. No decision is inherited — each is justified independently below.</p>
+<h2 id="2-api-framework-fastapi">2. API framework — FastAPI<a class="headerlink" href="#2-api-framework-fastapi" title="Permanent link">&para;</a></h2>
+<p>Decision: FastAPI + Pydantic + Uvicorn.</p>
+<p>Rationale:</p>
+<ul>
+<li>FastAPI auto-generates an OpenAPI spec (NFR-6), which is the machine-readable
+  contract for the retrieval API and the foundation for any future client SDK
+  (ADR-001 §7.4).</li>
+<li>Pydantic models define the request/response contract, the chunk schema, and
+  the corpus metadata — one type system from ingestion to API response.</li>
+<li>Async-native, which suits the HTTP-client-heavy architecture (embedding
+  calls, vector store queries).</li>
+<li>MIT licensed; the standard Python web framework for this shape of service.</li>
+</ul>
+<p>Alternatives considered:</p>
+<ul>
+<li>Flask / Django: lack async-native support and auto-generated OpenAPI.</li>
+<li>gRPC: stronger typing but worse tooling for ad-hoc consumers (curl, Postman,
+  browser). HTTP+JSON is the lower-friction choice for a service whose value
+  proposition is "any consumer, any stack."</li>
+<li>Litestar: capable but smaller ecosystem; FastAPI's community and
+  documentation are a pragmatic advantage for a single-developer project.</li>
+</ul>
+<h2 id="3-embedding-model-bge-m3">3. Embedding model — BGE-M3<a class="headerlink" href="#3-embedding-model-bge-m3" title="Permanent link">&para;</a></h2>
+<p>Decision: <code>BAAI/bge-m3</code> as the embedding model.</p>
+<p>This decision was validated against prior analysis from an adjacent project and
+confirmed independently for this platform. The reasoning:</p>
+<ul>
+<li>Multilingual including German (relevant for ISO/DIN standards with German
+  terminology), and consistently rated the strongest open-source multilingual
+  embedding model in 2026 comparisons.</li>
+<li>Native multi-functionality: produces dense <strong>and</strong> sparse (lexical) vectors
+  from one model, plus a ColBERT-style multi-vector output, supporting inputs
+  up to 8192 tokens. This directly enables the hybrid dense+sparse retrieval
+  pattern (ADR-001 §6.1) without a second model.</li>
+<li>Servable over HTTP via Ollama's embeddings endpoint or Hugging Face Text
+  Embeddings Inference (TEI). This is what makes the topology-agnostic
+  architecture (ADR-001 §9.3) possible — the embedding service can run on the
+  same host or a remote node, reached via the same HTTP client.</li>
+<li>MIT licensed — NFR-3 clean.</li>
+<li>~1.06 GB at F16, fitting comfortably on modest hardware.</li>
+</ul>
+<p>Alternatives considered:</p>
+<ul>
+<li>multilingual-E5: supports German but lacks native sparse output.</li>
+<li>Qwen3-Embedding: higher quality on some benchmarks but the strong variants
+  require substantially more VRAM.</li>
+<li>IBM Granite Embedding: smaller ecosystem and less multilingual coverage.</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Sparse vector generation via BGE-M3 was evaluated on both Ollama and TEI.
+Neither exposes sparse output for this model architecture. Qdrant native BM25
+(SparseVectorParams, modifier=idf) is used for the sparse component instead.</p>
+</div>
+<h3 id="31-embedding-service-deployment">3.1 Embedding service deployment<a class="headerlink" href="#31-embedding-service-deployment" title="Permanent link">&para;</a></h3>
+<p>The embedding model is served over HTTP, not loaded in-process. Two supported
+serving paths:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Image / tool</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>Ollama</td>
+<td>Simpler setup; <code>ollama pull bge-m3</code></td>
+</tr>
+<tr>
+<td>B</td>
+<td>HF TEI</td>
+<td>Purpose-built for embeddings; BGE-M3 model card</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>explicitly lists TEI support</td>
+</tr>
+</tbody>
+</table>
+<p>The choice is a deployment-time decision, not an architecture decision. The
+platform calls <code>EMBEDDING_BASE_URL</code> + <code>EMBEDDING_MODEL</code> and does not know
+which serving path is behind the endpoint.</p>
+<h2 id="4-vector-store-qdrant">4. Vector store — Qdrant<a class="headerlink" href="#4-vector-store-qdrant" title="Permanent link">&para;</a></h2>
+<p>Decision: Qdrant as the primary vector store.</p>
+<p>Rationale:</p>
+<ul>
+<li>The platform is an HTTP-native service (ADR-001 §3, §7). Qdrant is a
+  <strong>server</strong> with an HTTP/REST + gRPC API by default — it is the same shape as
+  the platform itself. No wrapper, no adapter needed.</li>
+<li>Native sparse-vector support: Qdrant ingests BGE-M3's native sparse vectors
+  directly, giving a stronger hybrid than BM25 approximations. This is the
+  highest-quality hybrid retrieval path available without a second system.</li>
+<li>Collection-based namespacing maps directly to the corpus model (ADR-001 §4.1):
+  one Qdrant collection per corpus.</li>
+<li>Apache-2.0 licensed — NFR-3 clean.</li>
+<li>Designed for the single-machine-to-cluster range that the platform's
+  deployment topologies span (ADR-001 §9.3).</li>
+</ul>
+<p>Alternatives considered:</p>
+<ul>
+<li>
+<p><strong>LanceDB (Apache-2.0, embedded/in-process):</strong> Evaluated during prior
+  analysis for host-local deployments. LanceDB is the right shape for a library, not a service —
+  it has no first-class server mode. Since this platform <em>is</em> a service,
+  wrapping LanceDB behind a bespoke HTTP layer would reinvent what Qdrant
+  already provides. LanceDB remains a documented fallback for a future
+  "embedded library mode" if one is ever needed.</p>
+</li>
+<li>
+<p><strong>Chroma (Apache-2.0, client/server):</strong> Viable as a simpler alternative.
+  Lacks Qdrant's native sparse-vector hybrid, which means the platform would
+  fall back to Chroma's built-in BM25 — a weaker hybrid. Documented as a
+  fallback if Qdrant proves operationally heavy for a given deployment.</p>
+</li>
+<li>
+<p><strong>pgvector:</strong> Excluded. It is a PostgreSQL extension, so adopting it
+  reintroduces a full database server. The platform should not require a
+  database — the vector index is the only persistence layer needed.</p>
+</li>
+</ul>
+<h3 id="41-qdrant-deployment">4.1 Qdrant deployment<a class="headerlink" href="#41-qdrant-deployment" title="Permanent link">&para;</a></h3>
+<p>Qdrant runs as a Docker container with a pinned image tag, a healthcheck, and a
+named volume for the index. The platform's <code>compose.yaml</code> includes it as a
+service. Configuration:</p>
+<ul>
+<li><code>QDRANT_URL</code> — endpoint for the Qdrant HTTP API (default:
+  <code>http://qdrant:6333</code>).</li>
+<li>One collection per corpus, created by the ingestion command.</li>
+</ul>
+<h2 id="5-document-parsing-phased-with-primary-and-fallback-paths">5. Document parsing — phased, with primary and fallback paths<a class="headerlink" href="#5-document-parsing-phased-with-primary-and-fallback-paths" title="Permanent link">&para;</a></h2>
+<h3 id="51-phase-1-v010-markdown">5.1 Phase 1 (v0.1.0) — Markdown<a class="headerlink" href="#51-phase-1-v010-markdown" title="Permanent link">&para;</a></h3>
+<p>No external parsing library needed. The platform reads structured <code>.md</code> files
+directly, splitting on heading hierarchy (<code>#</code>, <code>##</code>, <code>###</code>, etc.) to produce
+structure-aware chunks. This is implemented as project code — a markdown reader
+that emits the normalised intermediate representation (section/heading/text
+triples with metadata).</p>
+<h3 id="52-phase-2-v020-pdf">5.2 Phase 2 (v0.2.0) — PDF<a class="headerlink" href="#52-phase-2-v020-pdf" title="Permanent link">&para;</a></h3>
+<p>Structured PDF ingestion for technical standards (ISO 26262 and similar). The
+parsing library must:</p>
+<ul>
+<li>Preserve heading hierarchy and reading order.</li>
+<li>Extract tables with structure.</li>
+<li>Handle multi-column layouts.</li>
+<li>Be self-hostable with no external API dependency.</li>
+<li>Be permissively licensed (NFR-3).</li>
+</ul>
+<h4 id="521-research-findings-pdf-parser-landscape-june-2026">5.2.1 Research findings — PDF parser landscape (June 2026)<a class="headerlink" href="#521-research-findings-pdf-parser-landscape-june-2026" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>License</th>
+<th>Structure</th>
+<th>OCR/VLM</th>
+<th>Self-host</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Docling</strong></td>
+<td>MIT (codebase)</td>
+<td>Yes</td>
+<td>VLM via Granite</td>
+<td>Yes</td>
+<td><strong>Primary</strong></td>
+</tr>
+<tr>
+<td><strong>Granite-Docling-258M</strong></td>
+<td>Apache 2.0 (model)</td>
+<td>Yes</td>
+<td>Built-in VLM</td>
+<td>Yes</td>
+<td>VLM for above</td>
+</tr>
+<tr>
+<td>PyMuPDF4LLM</td>
+<td>AGPL-3.0</td>
+<td>Yes</td>
+<td>No native OCR</td>
+<td>Yes</td>
+<td>Fallback only</td>
+</tr>
+<tr>
+<td>Marker</td>
+<td>GPL-3.0+ (code); cc-by-nc-</td>
+<td>Yes</td>
+<td>Surya OCR</td>
+<td>Yes</td>
+<td>Excluded</td>
+</tr>
+<tr>
+<td></td>
+<td>sa-4.0 (model weights)</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>MinerU</td>
+<td>Custom (Apache-2.0 based,</td>
+<td>Yes</td>
+<td>Built-in VLM</td>
+<td>Yes</td>
+<td>Monitor</td>
+</tr>
+<tr>
+<td></td>
+<td>additional conditions)</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="522-primary-choice-docling-granite-docling-258m">5.2.2 Primary choice — Docling + Granite-Docling-258M<a class="headerlink" href="#522-primary-choice-docling-granite-docling-258m" title="Permanent link">&para;</a></h4>
+<p>Decision: Docling (MIT) with the Granite-Docling-258M VLM (Apache 2.0) as the
+primary PDF parsing path.</p>
+<p>Rationale:</p>
+<ul>
+<li><strong>License-clean:</strong> MIT codebase + Apache 2.0 model — both permissive, no
+  copyleft risk, NFR-3 satisfied without process isolation.</li>
+<li><strong>Structure-aware:</strong> Layout analysis, heading detection, table recognition,
+  reading order — exactly what structured ISO/technical PDFs need.</li>
+<li><strong>VLM path replaces OCR:</strong> Granite-Docling-258M is a 258M-parameter
+  vision-language model that processes pages in one shot, avoiding traditional
+  OCR entirely. IBM Research reports 30× speedup over OCR-based pipelines.
+  The model runs on CPU or GPU and fits easily on modest hardware.</li>
+<li><strong>Output formats:</strong> Markdown and JSON natively — the Markdown output maps
+  directly to the platform's normalised intermediate representation.</li>
+<li><strong>Future-proof:</strong> Docling handles PDF, DOCX, PPTX, XLSX, HTML, and images,
+  so the later format phases (ADR-001 §5.1) are covered by the same library.</li>
+<li><strong>Active ecosystem:</strong> 37k+ GitHub stars, IBM + Red Hat backing, donated to
+  the Linux Foundation's Agentic AI Foundation, purpose-built <code>docling-eval</code>
+  framework for quality measurement.</li>
+<li><strong>Self-hostable:</strong> Runs entirely locally, no external API required (NFR-1).</li>
+</ul>
+<p>Granite-Docling-258M is servable via Ollama (<code>ollama pull ibm/granite-docling:258m</code>)
+or via the Docling library's built-in VLM pipeline (<code>--pipeline vlm
+--vlm-model granite_docling</code>), so the deployment model aligns with the
+platform's HTTP-oriented architecture.</p>
+<h4 id="523-documented-fallback-pymupdf4llm-agpl-30-containerised">5.2.3 Documented fallback — PyMuPDF4LLM (AGPL-3.0, containerised)<a class="headerlink" href="#523-documented-fallback-pymupdf4llm-agpl-30-containerised" title="Permanent link">&para;</a></h4>
+<p>If Docling's output quality falls short on specific ISO PDFs during testing,
+PyMuPDF4LLM is the documented fallback. It provides strong heading-aware,
+multi-column, table-extracting PDF-to-Markdown conversion.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>PyMuPDF4LLM is licensed under AGPL-3.0 (dual-licensed with Artifex
+Commercial). <strong>It must not be imported into the platform's Python process.</strong>
+The required integration pattern per ADR-001 §3.1 is:</p>
+<ul>
+<li>
+<p>Run PyMuPDF4LLM as a <strong>separate Docker container</strong> exposing an HTTP
+  endpoint (e.g. a thin FastAPI wrapper that accepts a PDF and returns
+  Markdown).</p>
+</li>
+<li>
+<p>The platform communicates with it only over the network boundary.</p>
+</li>
+<li>
+<p>The copyleft obligation applies only to the isolated container, not to the
+  platform or its consumers.</p>
+</li>
+<li>
+<p>The container's Dockerfile and wrapper code must be AGPL-3.0-compatible
+  and the source offered per AGPL §13.</p>
+</li>
+</ul>
+<p>This fallback is not part of the default deployment and is not included in
+the platform's <code>compose.yaml</code>. It is a documented, operator-initiated
+alternative for cases where Docling is insufficient.</p>
+</div>
+<h4 id="524-excluded-marker-gpl-30">5.2.4 Excluded — Marker (GPL-3.0+)<a class="headerlink" href="#524-excluded-marker-gpl-30" title="Permanent link">&para;</a></h4>
+<p>Marker is GPL-3.0+ for the code and cc-by-nc-sa-4.0 for the model weights.
+The model weights license prohibits commercial use above $5M revenue and
+restricts redistribution. Even with the containerised isolation pattern, the
+model weight restrictions make it unsuitable for a platform intended for
+commercial use alongside proprietary code. Excluded.</p>
+<h4 id="525-monitor-mineru-custom-apache-20-based-license">5.2.5 Monitor — MinerU (custom Apache-2.0-based license)<a class="headerlink" href="#525-monitor-mineru-custom-apache-20-based-license" title="Permanent link">&para;</a></h4>
+<p>MinerU recently moved from AGPL-3.0 to a custom license described as "based on
+Apache 2.0 with additional conditions." The additional conditions have not been
+reviewed in detail. MinerU's capabilities are strong (VLM + OCR dual engine,
+109 languages, structure preservation), and if the license terms are confirmed
+as compatible, it could be a strong alternative to Docling. Flagged for
+monitoring and legal review if needed.</p>
+<h3 id="53-embedded-visual-content-images-and-tables">5.3 Embedded visual content — images and tables<a class="headerlink" href="#53-embedded-visual-content-images-and-tables" title="Permanent link">&para;</a></h3>
+<p>This section records decisions on visual content found inside ingested
+documents. These decisions apply to all current and planned format phases
+(Markdown, PDF, DOCX).</p>
+<h4 id="531-embedded-images">5.3.1 Embedded images<a class="headerlink" href="#531-embedded-images" title="Permanent link">&para;</a></h4>
+<p>Decision: extract and index the caption and immediately surrounding text
+only. Image pixels are not stored, described, or embedded.</p>
+<p>Rationale: for normative technical standards (ISO 26262, MIL-STD-882E,
+and similar), figures are almost always accompanied by a caption and
+surrounded by explanatory prose. The retrieval value is in that text, not
+the visual content itself. Generating VLM descriptions of figures during
+ingestion adds per-image inference cost, introduces hallucination risk in
+stored metadata, and has not been shown to improve Recall@5 or MRR on
+this corpus type.</p>
+<p>Docling extracts captions and figure references as part of its layout
+analysis output. The <code>pdf.py</code> reader (v0.2.0) will preserve this text in
+the <code>DocumentSection</code> IR and pass it to the chunker alongside surrounding
+prose. No additional step is required.</p>
+<p>Revisit trigger: eval harness shows systematic misses on figure-heavy
+sections that cannot be explained by caption quality alone.</p>
+<p>Out of scope until explicitly revisited:</p>
+<ul>
+<li>VLM-based image description stored as retrievable text</li>
+<li>Image pixel storage or visual embedding</li>
+<li>Standalone image ingestion (e.g. <code>.png</code>, <code>.jpg</code> files as corpus sources)</li>
+<li>Visual search or multimodal retrieval</li>
+</ul>
+<h4 id="532-tables">5.3.2 Tables<a class="headerlink" href="#532-tables" title="Permanent link">&para;</a></h4>
+<p>Decision: preserve table structure as inline Markdown text. No special
+chunking or relational representation.</p>
+<p>For <strong>PDF sources</strong>, Docling extracts tables with row/column structure and
+renders them as Markdown tables in its output. This passes through the IR
+unchanged and is embedded as part of the containing section's text.</p>
+<p>For <strong>Markdown sources</strong>, the reader already captures raw Markdown table
+syntax as part of the section body. No transformation is applied.</p>
+<p>In both cases the chunker treats table text the same as prose. A table
+that exceeds the token limit triggers the standard recursive fallback
+(paragraph split, then sentence split). This is a known limitation: a
+large table split mid-row loses structural coherence. It is accepted for
+v0.1.0–v0.2.0 given that most normative tables in technical standards fit
+within the 512-token limit.</p>
+<p>Revisit trigger: eval harness shows retrieval failures on table-heavy
+sections, or a consuming project reports citation errors tracing back to
+split table rows.</p>
+<p>Out of scope until explicitly revisited:</p>
+<ul>
+<li>Table-aware chunking (split on row boundaries, not token count)</li>
+<li>Relational or structured table storage</li>
+<li>Table-to-text normalisation (e.g. flattening a matrix into sentences)</li>
+</ul>
+<h4 id="533-ocr-for-scanned-content">5.3.3 OCR for scanned content<a class="headerlink" href="#533-ocr-for-scanned-content" title="Permanent link">&para;</a></h4>
+<p>Decision: out of scope. NormaCore targets <em>authored</em> structured documents
+— PDFs produced from digital source files, not scanned paper documents.</p>
+<p>Docling exposes an OCR fallback flag but it is not enabled by default and
+has not been tested against NormaCore's eval harness. Enabling it
+introduces a separate quality dimension (OCR accuracy) that the current
+harness does not measure.</p>
+<p>Revisit trigger: a corpus operator explicitly needs scanned document
+support and is willing to author eval fixtures covering OCR output quality.</p>
+<h2 id="6-retrieval-orchestration-lean-not-a-framework">6. Retrieval orchestration — lean, not a framework<a class="headerlink" href="#6-retrieval-orchestration-lean-not-a-framework" title="Permanent link">&para;</a></h2>
+<p>Decision: implement retrieval as project code, not via LlamaIndex, LangChain,
+or Haystack.</p>
+<p>This decision was validated against prior analysis and confirmed independently.
+The reasoning:</p>
+<ul>
+<li>The retrieval flow is a single-shot query → embed → search → fuse → return
+  pipeline with no agentic routing, no multi-step reasoning, and no tool use.
+  A framework adds dependency weight and API churn for no functional gain.</li>
+<li>Keeping retrieval as project code preserves the small SBOM and audit surface
+  (NFR-4).</li>
+<li>Escape hatch: if a future need (multi-stage pipelines, complex routing)
+  justifies a framework, Haystack is the documented upgrade target
+  (Apache-2.0, pipeline-oriented, audit-friendly).</li>
+</ul>
+<h2 id="7-deployment-topologies">7. Deployment topologies<a class="headerlink" href="#7-deployment-topologies" title="Permanent link">&para;</a></h2>
+<p>The platform is deployable across multiple topologies. The pipeline logic is
+identical; only endpoint configuration and container placement change.</p>
+<h3 id="71-topology-1-all-in-one-default-for-v010">7.1 Topology 1 — all-in-one (default for v0.1.0)<a class="headerlink" href="#71-topology-1-all-in-one-default-for-v010" title="Permanent link">&para;</a></h3>
+<p>All services on one host:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>compose.yaml:
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  services:
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    api:        # FastAPI app
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    qdrant:     # Vector store
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    embedding:  # BGE-M3 via Ollama or TEI
+</code></pre></div>
+<ul>
+<li>Strongest air-gap posture (NFR-1).</li>
+<li>Simplest deployment; single <code>docker compose up</code>.</li>
+<li>Constrained by host resources (RAM, VRAM if GPU-accelerated embedding).</li>
+</ul>
+<h3 id="72-topology-2-split-embedding">7.2 Topology 2 — split embedding<a class="headerlink" href="#72-topology-2-split-embedding" title="Permanent link">&para;</a></h3>
+<p>Embedding service on a separate internal node. The API server and Qdrant remain
+on the primary host. <code>EMBEDDING_BASE_URL</code> points to the remote node.</p>
+<ul>
+<li>Frees host resources for Qdrant and the API.</li>
+<li>Keeps the vector index local.</li>
+</ul>
+<h3 id="73-topology-3-fully-distributed">7.3 Topology 3 — fully distributed<a class="headerlink" href="#73-topology-3-fully-distributed" title="Permanent link">&para;</a></h3>
+<p>API server on one host; Qdrant and embedding on separate node(s). All
+communication over HTTP.</p>
+<ul>
+<li>Centralised, independently scalable.</li>
+<li>Strongest resource headroom.</li>
+<li>Heaviest operational footprint.</li>
+</ul>
+<h3 id="74-configuration">7.4 Configuration<a class="headerlink" href="#74-configuration" title="Permanent link">&para;</a></h3>
+<p>Topology is controlled entirely by environment variables:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default (topology 1)</th>
+<th>Override for remote</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QDRANT_URL</code></td>
+<td><code>http://qdrant:6333</code></td>
+<td>Remote Qdrant URL</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_BASE_URL</code></td>
+<td><code>http://embedding:11434</code></td>
+<td>Remote embedding URL</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_MODEL</code></td>
+<td><code>bge-m3</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>No code changes between topologies. The <code>compose.yaml</code> shipped with the repo
+is topology 1; operators override variables for other topologies.</p>
+<h2 id="8-licensing-summary">8. Licensing summary<a class="headerlink" href="#8-licensing-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>License</th>
+<th>Role</th>
+<th>Verified via</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FastAPI</td>
+<td>MIT</td>
+<td>API framework</td>
+<td>PyPI / GitHub</td>
+</tr>
+<tr>
+<td>Pydantic</td>
+<td>MIT</td>
+<td>Data models</td>
+<td>PyPI / GitHub</td>
+</tr>
+<tr>
+<td>Qdrant</td>
+<td>Apache-2.0</td>
+<td>Vector store</td>
+<td>GitHub LICENSE</td>
+</tr>
+<tr>
+<td>BGE-M3</td>
+<td>MIT</td>
+<td>Embedding model</td>
+<td>Hugging Face model card</td>
+</tr>
+<tr>
+<td>Docling (codebase)</td>
+<td>MIT</td>
+<td>PDF parsing</td>
+<td>GitHub LICENSE</td>
+</tr>
+<tr>
+<td>Granite-Docling-258M</td>
+<td>Apache-2.0</td>
+<td>VLM for Docling</td>
+<td>Hugging Face model card</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td>MIT</td>
+<td>Model serving</td>
+<td>GitHub LICENSE</td>
+</tr>
+<tr>
+<td>HF TEI</td>
+<td>Apache-2.0</td>
+<td>Model serving (alt)</td>
+<td>GitHub LICENSE</td>
+</tr>
+</tbody>
+</table>
+<p>All primary components are MIT or Apache-2.0. No copyleft in the core stack.</p>
+<h2 id="9-updated-stack-summary">9. Updated stack summary<a class="headerlink" href="#9-updated-stack-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API framework</td>
+<td>FastAPI + Pydantic + Uvicorn (MIT)</td>
+</tr>
+<tr>
+<td>Embedding model</td>
+<td>BGE-M3 (MIT), served via Ollama or TEI</td>
+</tr>
+<tr>
+<td>Vector store</td>
+<td>Qdrant (Apache-2.0); Chroma as fallback</td>
+</tr>
+<tr>
+<td>Document parsing (MD)</td>
+<td>Project code (structure-aware heading split)</td>
+</tr>
+<tr>
+<td>Document parsing (PDF)</td>
+<td>Docling + Granite-Docling-258M (MIT / Apache-2.0);</td>
+</tr>
+<tr>
+<td></td>
+<td>PyMuPDF4LLM as containerised AGPL fallback</td>
+</tr>
+<tr>
+<td>Retrieval orchestration</td>
+<td>Project code (lean); Haystack as escape hatch</td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td>Docker Compose; topology via env vars</td>
+</tr>
+</tbody>
+</table>
+<h2 id="10-consequences">10. Consequences<a class="headerlink" href="#10-consequences" title="Permanent link">&para;</a></h2>
+<h3 id="101-positive">10.1 Positive<a class="headerlink" href="#101-positive" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Every primary component is permissively licensed — the platform can live
+  alongside or be consumed by proprietary code without copyleft risk.</li>
+<li>Docling + Granite-Docling covers PDF, DOCX, PPTX, and images under one
+  library, reducing the integration surface for future format phases.</li>
+<li>Qdrant's native sparse-vector support gives the strongest hybrid retrieval
+  without a second system.</li>
+<li>The topology is controlled entirely by environment variables — no code
+  changes between all-in-one and distributed deployments.</li>
+</ul>
+<h3 id="102-negative-trade-offs">10.2 Negative / trade-offs<a class="headerlink" href="#102-negative-trade-offs" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Qdrant is a heavier operational component than an embedded store (LanceDB);
+  justified by the platform's service-native architecture.</li>
+<li>Docling's VLM path (Granite-Docling-258M) requires either a GPU or
+  CPU-based inference, adding resource requirements beyond a pure text-parsing
+  library. Mitigated by the model's small size (258M params).</li>
+<li>The AGPL fallback (PyMuPDF4LLM) requires container isolation, which is
+  operationally heavier than a pip install. Justified by NFR-3.</li>
+</ul>
+<h3 id="103-out-of-scope-deferred-decisions">10.3 Out of scope (deferred decisions)<a class="headerlink" href="#103-out-of-scope-deferred-decisions" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Reranker model selection (deferred until evaluation shows the hybrid
+  baseline is insufficient).</li>
+<li>Python SDK for the retrieval API (deferred to post-v0.1.0).</li>
+<li>DOCX / PPTX ingestion (future format phase; Docling supports them).</li>
+<li>CI/CD pipeline configuration.</li>
+<li>Monitoring and observability stack.</li>
+<li>Embedded image description (VLM inference on figures; see §5.4)</li>
+<li>Standalone image ingestion and visual retrieval</li>
+<li>OCR for scanned documents (Docling OCR flag available but untested and disabled by default)</li>
+</ul>
+<h2 id="11-open-items">11. Open items<a class="headerlink" href="#11-open-items" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Confirm Qdrant vs Chroma selection in review (Qdrant recommended).</li>
+<li>Benchmark Docling + Granite-Docling-258M against representative ISO 26262
+  PDFs during v0.2.0 development; if structure extraction is insufficient,
+  evaluate the PyMuPDF4LLM containerised fallback.</li>
+<li>Review MinerU's custom license terms if Docling proves insufficient.</li>
+<li>Re-verify Ollama's MIT license against its canonical LICENSE file (verified
+  via GitHub, not independently confirmed via package metadata).</li>
+<li>Confirm the embedding serving path (Ollama vs TEI) during v0.1.0
+  development based on operational simplicity.</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<p>[^1]: <a href="https://github.com/docling-project/docling">Docling — GitHub (MIT)</a>
+[^2]: <a href="https://huggingface.co/ibm-granite/granite-docling-258M">Granite-Docling-258M — Hugging Face (Apache 2.0)</a>
+[^3]: <a href="https://huggingface.co/BAAI/bge-m3">BAAI/bge-m3 — Hugging Face (MIT)</a>
+[^4]: <a href="https://github.com/qdrant/qdrant">Qdrant — GitHub (Apache-2.0)</a>
+[^5]: <a href="https://github.com/pymupdf/pymupdf4llm/blob/main/LICENSE">pymupdf4llm LICENSE — GitHub (AGPL-3.0)</a>
+[^6]: <a href="https://pypi.org/project/marker-pdf/">marker-pdf — PyPI (GPL-3.0-or-later)</a>
+[^7]: <a href="https://github.com/opendatalab/mineru">MinerU — GitHub (custom Apache-2.0-based license)</a>
+[^8]: <a href="https://idp-software.com/vendors/docling/">Docling: IBM Open-Source Document Processing — IDP-Software</a>
+[^9]: <a href="https://ibm.com/new/announcements/granite-docling-end-to-end-document-conversion">IBM Granite-Docling announcement</a>
+[^10]: <a href="https://en.wikipedia.org/wiki/Chroma_(vector_database)">Chroma — Wikipedia (Apache-2.0)</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 adjiap — Apache-2.0 License
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.integrate", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

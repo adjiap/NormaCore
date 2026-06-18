@@ -1,0 +1,1374 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Self-hostable RAG ingestion and retrieval platform for structured documents">
+      
+      
+        <meta name="author" content="adjiap">
+      
+      
+        <link rel="canonical" href="https://adjiap.github.io/normacore/adr/adr-001-system-architecture/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-ProperDocs 1.6.7, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>ADR-001: System Architecture — Shared RAG Ingestion and Retrieval Platform - NormaCore</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adr-001-system-architecture-shared-rag-ingestion-and-retrieval-platform" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="NormaCore" class="md-header__button md-logo" aria-label="NormaCore" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NormaCore
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ADR-001: System Architecture — Shared RAG Ingestion and Retrieval Platform
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/adjiap/normacore" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    adjiap/normacore
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/requirements/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/corpus-format/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api-reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../architecture/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NormaCore" class="md-nav__button md-logo" aria-label="NormaCore" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    NormaCore
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/adjiap/normacore" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    adjiap/normacore
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/corpus-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpus Formatting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/eval-fixtures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation Fixtures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adr-001-system-architecture-shared-rag-ingestion-and-retrieval-platform">ADR-001: System Architecture — Shared RAG Ingestion and Retrieval Platform<a class="headerlink" href="#adr-001-system-architecture-shared-rag-ingestion-and-retrieval-platform" title="Permanent link">&para;</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Date: 2026-06-02</li>
+<li>Deciders: Project owner (single-developer greenfield)</li>
+<li>Relates to: ADR-002 (tech stack); handover document (idea origin and prior art)</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This ADR defines the <strong>architecture and design constraints</strong> for the platform.
+The <strong>tech stack</strong> (embedding model, vector store, API framework, document
+parsing) is decided in ADR-002. The two ADRs are designed to be read together
+but are separable: this one answers <em>what the system does and why</em>; ADR-002
+answers <em>what it is built with</em>.</p>
+</div>
+<h2 id="1-context-and-problem-statement">1. Context and problem statement<a class="headerlink" href="#1-context-and-problem-statement" title="Permanent link">&para;</a></h2>
+<p>Multiple AI-assisted tools and applications need to query the same or
+overlapping document corpora — technical standards, specifications, handbooks,
+and similar structured public documents. Today, each consuming tool must own its
+own ingestion pipeline, embedding infrastructure, and vector index. This
+duplicates effort, fragments the corpus, and makes retrieval quality
+inconsistent across tools.</p>
+<p>The industry offers several self-hostable RAG platforms, but every existing tool
+bundles application-layer concerns (chat UIs, agents, user management) with
+the ingestion and retrieval infrastructure. None is designed as a lean,
+domain-agnostic ingestion + retrieval microservice that downstream tools
+consume as a dependency.</p>
+<h3 id="11-the-gap">1.1 The gap<a class="headerlink" href="#11-the-gap" title="Permanent link">&para;</a></h3>
+<p>Embedding pipelines and vector indexes are <strong>infrastructure</strong>, not application
+logic, and belong in a shared service rather than inside any single consuming
+tool. What is missing is:</p>
+<ul>
+<li>A self-hostable service that accepts structured documents, chunks them
+  intelligently, embeds them, and stores them in a shared, namespaced vector
+  index.</li>
+<li>An HTTP retrieval API that any consumer (any language, any stack) can call
+  with a simple request.</li>
+<li>A first-class accuracy evaluation harness that verifies retrieval quality
+  before any consumer depends on a newly ingested corpus.</li>
+<li>A deployment model that works both standalone and embedded inside an existing
+  compose stack.</li>
+</ul>
+<p>This ADR designs that service.</p>
+<h2 id="2-prior-art-evaluated-and-rejected">2. Prior art — evaluated and rejected<a class="headerlink" href="#2-prior-art-evaluated-and-rejected" title="Permanent link">&para;</a></h2>
+<p>The following tools were evaluated during the ideation session. Each is a
+capable product, but none matches the shape of a lean retrieval primitive.</p>
+<h3 id="21-r2r-sciphi-ai-mit">2.1 R2R (SciPhi-AI, MIT)<a class="headerlink" href="#21-r2r-sciphi-ai-mit" title="Permanent link">&para;</a></h3>
+<p>The closest match. A self-hostable RAG engine with a containerised RESTful API,
+multimodal ingestion, hybrid search, and Python + JS SDKs. However:</p>
+<ul>
+<li>Feature-heavy: agentic deep research, knowledge graphs, user management —
+  application-layer concerns this platform explicitly avoids.</li>
+<li>Leans on PostgreSQL + pgvector rather than a dedicated vector store, which
+  reintroduces a database where this platform wants a lightweight, file-backed
+  or single-container store.</li>
+<li>Designed as an end-to-end RAG application, not a retrieval primitive.</li>
+</ul>
+<p>R2R was evaluated as a fork candidate and rejected: stripping its application
+layer and swapping its vector store would be a deeper rewrite than a
+greenfield build.</p>
+<p><a href="https://github.com/SciPhi-AI/R2R">https://github.com/SciPhi-AI/R2R</a></p>
+<h3 id="22-ragflow-infiniflow-apache-20">2.2 RAGFlow (infiniflow, Apache-2.0)<a class="headerlink" href="#22-ragflow-infiniflow-apache-20" title="Permanent link">&para;</a></h3>
+<p>Strong document understanding, template-based chunking with visual inspection,
+and traceable citations. Ships as a full application with chat UI, knowledge
+base UI, and user management. Not designed to be consumed as a service
+dependency by other tools.</p>
+<p><a href="https://github.com/infiniflow/ragflow">https://github.com/infiniflow/ragflow</a></p>
+<h3 id="23-anythingllm-mintplex-labs">2.3 AnythingLLM (Mintplex Labs)<a class="headerlink" href="#23-anythingllm-mintplex-labs" title="Permanent link">&para;</a></h3>
+<p>100% offline capable, 9+ vector database backends, 53k+ GitHub stars. Again an
+end-user application (desktop + Docker), not a programmatic
+ingestion/retrieval service.</p>
+<p><a href="https://github.com/Mintplex-Labs/anything-llm">https://github.com/Mintplex-Labs/anything-llm</a></p>
+<h3 id="24-others-kotaemon-dify">2.4 Others (Kotaemon, Dify)<a class="headerlink" href="#24-others-kotaemon-dify" title="Permanent link">&para;</a></h3>
+<p>Document QA web UIs with multi-user login and hybrid retrieval. Applications,
+not infrastructure primitives.</p>
+<h3 id="25-conclusion">2.5 Conclusion<a class="headerlink" href="#25-conclusion" title="Permanent link">&para;</a></h3>
+<p>Every evaluated tool bundles the application layer with the ingestion and
+retrieval infrastructure. The accuracy evaluation harness as a first-class
+feature is absent from all of them. A greenfield build is the correct approach.</p>
+<h2 id="3-design-principles">3. Design principles<a class="headerlink" href="#3-design-principles" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Infrastructure, not application.</strong> The platform provides ingestion and
+   retrieval. It does not provide chat, agents, user management, or any
+   downstream application logic.</p>
+</li>
+<li>
+<p><strong>Domain-agnostic.</strong> The platform is not "ISO standards" or "safety
+   documents" — it is a generic document ingestion and retrieval service.
+   Domain specificity lives in the corpus, not the engine.</p>
+</li>
+<li>
+<p><strong>Self-hostable and air-gap capable.</strong> The platform must be deployable with
+   no internet egress, no cloud dependency, and no external API requirement.
+   Cloud-hosted embedding or inference may be used as an explicit, documented
+   exception at deployment time but is never required.</p>
+</li>
+<li>
+<p><strong>Permissively licensed.</strong> Every component in the core platform must be MIT,
+   Apache-2.0, or BSD-3-Clause. Components with copyleft licenses (AGPL, GPL)
+   may only be used if they run as isolated, separately containerised services
+   communicating over a well-defined API boundary, and only as documented
+   fallbacks — never in the core codebase (see section 3.1).</p>
+</li>
+<li>
+<p><strong>Evaluation as a first-class feature.</strong> The repository ships tooling that
+   lets an operator verify retrieval accuracy before any consumer depends on a
+   newly ingested corpus.</p>
+</li>
+<li>
+<p><strong>Consumer-agnostic retrieval.</strong> The retrieval API is language- and
+   stack-agnostic. Any tool that can make an HTTP request can query the index.</p>
+</li>
+</ol>
+<h3 id="31-licensing-boundary-rule">3.1 Licensing boundary rule<a class="headerlink" href="#31-licensing-boundary-rule" title="Permanent link">&para;</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If a component is licensed under AGPL-3.0 or GPL-3.0 and is imported as a
+library into the platform's Python process, the copyleft obligation
+propagates to the entire service (AGPL §13 / GPL §5). This conflicts with
+the platform's goal of being usable alongside or by proprietary code.</p>
+<p>The safe integration pattern for copyleft components is <strong>process isolation</strong>:
+run the component as a separate container behind an HTTP API. The platform
+code communicates with it only over the network boundary, which is generally
+considered an "aggregate" rather than a derivative work. The copyleft
+obligation then applies only to the isolated container, not to the platform
+or its consumers.</p>
+<p>This pattern is documented here so that future contributors do not
+accidentally import a copyleft dependency into the core codebase. Any
+copyleft integration must be reviewed against this rule.</p>
+</div>
+<h2 id="4-corpus-model">4. Corpus model<a class="headerlink" href="#4-corpus-model" title="Permanent link">&para;</a></h2>
+<h3 id="41-namespaced-corpora">4.1 Namespaced corpora<a class="headerlink" href="#41-namespaced-corpora" title="Permanent link">&para;</a></h3>
+<p>The vector index is partitioned per document corpus. Each corpus occupies its
+own namespace (a separate collection, table, or equivalent in the vector store).
+Retrieval is always scoped to a named corpus — there is no cross-corpus query
+by default. This prevents contamination between unrelated document sets and
+allows independent lifecycle management (ingest, re-index, delete) per corpus.</p>
+<h3 id="42-standard-scoping-within-a-corpus">4.2 Standard-scoping within a corpus<a class="headerlink" href="#42-standard-scoping-within-a-corpus" title="Permanent link">&para;</a></h3>
+<p>A corpus may contain documents from a single standard or specification (e.g.
+ISO 26262, MIL-STD-882E) plus associated glossaries or supplements. The
+platform treats this as opaque: it does not interpret the standard's semantics.
+The consuming application decides which corpus to query.</p>
+<h3 id="43-corpus-metadata">4.3 Corpus metadata<a class="headerlink" href="#43-corpus-metadata" title="Permanent link">&para;</a></h3>
+<p>Every chunk carries metadata:</p>
+<ul>
+<li><code>corpus_id</code> — the namespace identifier.</li>
+<li><code>source</code> — the document within the corpus (e.g. <code>iso-26262-part-1</code>,
+  <code>glossary</code>).</li>
+<li><code>section</code> — the structural identifier (clause number, heading path).</li>
+<li><code>heading_path</code> — the full heading hierarchy, carried into the chunk text as
+  contextual headers (section 5.2).</li>
+<li><code>chunk_index</code> — ordinal position within the source document.</li>
+</ul>
+<p>This metadata enables filtered retrieval (section 7.3) and traceable citations
+for consuming applications.</p>
+<h2 id="5-ingestion-pipeline">5. Ingestion pipeline<a class="headerlink" href="#5-ingestion-pipeline" title="Permanent link">&para;</a></h2>
+<h3 id="51-supported-input-formats-phased">5.1 Supported input formats (phased)<a class="headerlink" href="#51-supported-input-formats-phased" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Format</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v0.1.0</td>
+<td>Markdown</td>
+<td>Structured <code>.md</code> files with heading hierarchy</td>
+</tr>
+<tr>
+<td>v0.2.0</td>
+<td>PDF</td>
+<td>Structured PDFs (ISO standards, technical specifications)</td>
+</tr>
+<tr>
+<td>Future</td>
+<td>DOCX, PPTX</td>
+<td>Deferred — parsing library selection supports them</td>
+</tr>
+</tbody>
+</table>
+<p>The ingestion pipeline is format-aware: a format-specific reader produces a
+normalised intermediate representation (structured text with heading hierarchy
+and metadata), which the chunker then processes uniformly regardless of source
+format.</p>
+<h3 id="52-chunking-strategy">5.2 Chunking strategy<a class="headerlink" href="#52-chunking-strategy" title="Permanent link">&para;</a></h3>
+<p>The chunking strategy is derived from 2026 RAG best-practice literature and
+prior analysis conducted during the ideation phase:</p>
+<ul>
+<li>
+<p><strong>Primary split: structure-aware.</strong> Chunk on the document's own boundaries
+  (section, clause, heading) so a retrieved chunk is a self-contained unit.
+  For structured documents, this step alone is the single biggest and easiest
+  retrieval-quality improvement available.</p>
+</li>
+<li>
+<p><strong>Fallback for oversized sections:</strong> Where a section exceeds the target size
+  band, fall back to recursive splitting on paragraph/sentence boundaries.
+  Recursive ~512-token splitting is the best-performing general default in
+  2026 benchmarks.</p>
+</li>
+<li>
+<p><strong>Contextual headers:</strong> Carry the heading path into each child chunk before
+  embedding. This makes chunks self-contained without a full semantic or
+  late-chunking pass.</p>
+</li>
+<li>
+<p><strong>Glossary / definition entries:</strong> One chunk per entry; do not split or merge.</p>
+</li>
+</ul>
+<h3 id="53-chunk-sizing-defaults">5.3 Chunk sizing defaults<a class="headerlink" href="#53-chunk-sizing-defaults" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Target size</td>
+<td>256–512 tokens</td>
+<td>Sweet spot for factoid / definition retrieval</td>
+</tr>
+<tr>
+<td>Overlap</td>
+<td>10–20%</td>
+<td>Provisional — validate against eval harness</td>
+</tr>
+<tr>
+<td>Max size</td>
+<td>~512 tokens</td>
+<td>Longer only for genuinely multi-concept passages</td>
+</tr>
+<tr>
+<td>Glossary entries</td>
+<td>Atomic</td>
+<td>Already at the small end of the band</td>
+</tr>
+</tbody>
+</table>
+<p>These are starting defaults to be tuned against the evaluation harness
+(section 8), not fixed constants.</p>
+<h3 id="54-embedding">5.4 Embedding<a class="headerlink" href="#54-embedding" title="Permanent link">&para;</a></h3>
+<p>Embed every chunk via the embedding service (HTTP endpoint). Store the dense
+vector; if the vector store supports native sparse vectors, store those too
+for hybrid retrieval. Otherwise, let the store's built-in full-text / BM25
+index cover the lexical half.</p>
+<h3 id="55-indexing-model">5.5 Indexing model<a class="headerlink" href="#55-indexing-model" title="Permanent link">&para;</a></h3>
+<p>Default: <strong>build-time indexing.</strong> The corpus is static (standards do not change
+between revisions), so a CLI ingestion command builds the index once per corpus.
+The index is persisted to a volume or directory.</p>
+<p>The ingestion command is a repeatable build step:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>make ingest CORPUS=iso-26262 SOURCE=./corpora/iso-26262/
+</code></pre></div>
+<p>Re-running the command rebuilds the index for that corpus from scratch
+(idempotent). Runtime indexing (hot-add documents to a live index) is a
+future enhancement, not a v0.1.0 requirement.</p>
+<h2 id="6-retrieval-design">6. Retrieval design<a class="headerlink" href="#6-retrieval-design" title="Permanent link">&para;</a></h2>
+<h3 id="61-rag-architecture-type-hybrid-advanced">6.1 RAG architecture type — Hybrid (Advanced)<a class="headerlink" href="#61-rag-architecture-type-hybrid-advanced" title="Permanent link">&para;</a></h3>
+<p>The platform implements Hybrid RAG: dense semantic search combined with
+sparse/lexical search, fused via Reciprocal Rank Fusion (RRF). This is the
+correct tier for the target use case (factoid / definition / clause lookup
+against structured documents) and is the de facto 2026 production baseline.</p>
+<ul>
+<li><strong>Not Naive RAG:</strong> pure dense top-k misses exact terms (codes, clause
+  numbers, German technical vocabulary).</li>
+<li><strong>Not Graph RAG:</strong> there is no cross-document relationship graph to traverse.</li>
+<li><strong>Not Agentic RAG:</strong> retrieval is single-shot per query, not a multi-step
+  tool-using loop.</li>
+</ul>
+<h3 id="62-retrieval-flow">6.2 Retrieval flow<a class="headerlink" href="#62-retrieval-flow" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Consumer sends a query to <code>POST /retrieve</code> with a <code>corpus_id</code> and query
+   text.</li>
+<li>The platform embeds the query via the embedding service.</li>
+<li>Dense search + sparse/BM25 search run against the corpus namespace.</li>
+<li>Results are fused (RRF) and the top-k chunks are returned with metadata
+   and relevance scores.</li>
+</ol>
+<h3 id="63-default-parameters">6.3 Default parameters<a class="headerlink" href="#63-default-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>top_k</td>
+<td>5</td>
+<td>Tuneable per request; keep small to avoid</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>context rot</td>
+</tr>
+<tr>
+<td>alpha</td>
+<td>0.7</td>
+<td>Dense weight in hybrid fusion (0.0 = pure</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>sparse, 1.0 = pure dense); tuneable</td>
+</tr>
+</tbody>
+</table>
+<h3 id="64-deferred-enhancements">6.4 Deferred enhancements<a class="headerlink" href="#64-deferred-enhancements" title="Permanent link">&para;</a></h3>
+<p>The following are out of the initial release and added only when the evaluation
+harness shows the hybrid baseline is insufficient, in ascending order of cost:</p>
+<ol>
+<li>Reranking (cross-encoder second stage)</li>
+<li>Multi-query / HyDE query expansion</li>
+<li>Semantic or late chunking</li>
+<li>GraphRAG (only if a relational, multi-hop need ever emerges)</li>
+</ol>
+<h2 id="7-retrieval-api-shape-decision-with-tradeoffs">7. Retrieval API shape (decision with tradeoffs)<a class="headerlink" href="#7-retrieval-api-shape-decision-with-tradeoffs" title="Permanent link">&para;</a></h2>
+<h3 id="71-option-a-http-only">7.1 Option A — HTTP only<a class="headerlink" href="#71-option-a-http-only" title="Permanent link">&para;</a></h3>
+<p>All consumers call the platform over HTTP. The API exposes:</p>
+<ul>
+<li><code>POST /ingest</code> — submit a document for ingestion (or trigger a corpus build).</li>
+<li><code>POST /retrieve</code> — query a corpus and receive ranked chunks.</li>
+<li><code>GET /corpora</code> — list available corpora.</li>
+<li><code>GET /health</code> — healthcheck.</li>
+</ul>
+<p>Pros:
+- Truly language- and stack-agnostic: any consumer that can make an HTTP
+  request can use the platform.
+- Single integration pattern to document and maintain.
+- Clean process boundary — the platform is a black box to consumers.</p>
+<p>Cons:
+- Python consumers pay serialisation overhead on every call.
+- No type-safe client — consumers must construct requests manually or
+  maintain their own client wrapper.</p>
+<h3 id="72-option-b-http-thin-python-sdk">7.2 Option B — HTTP + thin Python SDK<a class="headerlink" href="#72-option-b-http-thin-python-sdk" title="Permanent link">&para;</a></h3>
+<p>The platform ships a small Python client package (e.g. <code>pip install
+&lt;platform&gt;-client</code>) that wraps the HTTP API with typed methods and Pydantic
+response models.</p>
+<p>Pros:
+- Python consumers get type safety, IDE completion, and request construction
+  for free.
+- Non-Python consumers still use HTTP directly — no second integration path.
+- The SDK is a thin wrapper, not a second API surface — it calls the same HTTP
+  endpoints.</p>
+<p>Cons:
+- A second deliverable to maintain and version alongside the service.
+- Risk of the SDK drifting from the API if not tested together.</p>
+<h3 id="73-option-c-direct-store-access-for-python-consumers">7.3 Option C — direct store access for Python consumers<a class="headerlink" href="#73-option-c-direct-store-access-for-python-consumers" title="Permanent link">&para;</a></h3>
+<p>Python consumers import the platform's retrieval module and call the vector
+store directly (in-process), bypassing the HTTP API.</p>
+<p>Pros:
+- Lowest latency for Python consumers.
+- No network dependency.</p>
+<p>Cons:
+- Breaks the "infrastructure as a service" model — consumers must share the
+  platform's Python environment and vector store dependency.
+- Couples consumers to the platform's internals (store driver, embedding
+  model).
+- Makes the deployment model ambiguous: is the platform a service or a
+  library?
+- Two fundamentally different integration paths to document and maintain.</p>
+<h3 id="74-recommendation">7.4 Recommendation<a class="headerlink" href="#74-recommendation" title="Permanent link">&para;</a></h3>
+<p><strong>Option A (HTTP only) for v0.1.0</strong>, with Option B (thin Python SDK) as a
+documented future enhancement. Rationale:</p>
+<ul>
+<li>The platform's core value proposition is "any consumer, any stack, one
+  <code>POST /retrieve</code>." HTTP-only enforces that contract from day one.</li>
+<li>A Python SDK is a convenience layer, not a prerequisite. It can be added
+  later without breaking any existing consumer.</li>
+<li>Option C is rejected: it undermines the service boundary that justifies the
+  platform's existence as a shared dependency.</li>
+</ul>
+<p>The API will produce an OpenAPI spec (auto-generated by FastAPI), which serves
+as the machine-readable contract for any future SDK or client generator.</p>
+<h2 id="8-evaluation-harness-first-class-requirement">8. Evaluation harness (first-class requirement)<a class="headerlink" href="#8-evaluation-harness-first-class-requirement" title="Permanent link">&para;</a></h2>
+<h3 id="81-purpose">8.1 Purpose<a class="headerlink" href="#81-purpose" title="Permanent link">&para;</a></h3>
+<p>An operator must be able to run a single command and get a clear pass/fail
+signal that a freshly ingested corpus is retrievable with acceptable accuracy
+before any consuming application depends on it.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make eval CORPUS=iso-26262
+</code></pre></div>
+<h3 id="82-two-layer-evaluation">8.2 Two-layer evaluation<a class="headerlink" href="#82-two-layer-evaluation" title="Permanent link">&para;</a></h3>
+<p>The harness combines two complementary approaches:</p>
+<p><strong>Layer 1 — Curated query fixtures (per corpus).</strong>
+A human-authored set of <code>(query, expected_chunk_ids)</code> pairs that represent the
+"must-find" retrieval cases for a given corpus. These are ground-truth fixtures
+that catch regressions and validate that critical content is retrievable.</p>
+<ul>
+<li>Stored alongside the corpus definition (e.g. <code>corpora/iso-26262/eval/</code>).</li>
+<li>Each fixture specifies a query, the expected chunk(s), and the minimum
+  acceptable rank position.</li>
+</ul>
+<p><strong>Layer 2 — Auto-generated from chunk metadata.</strong>
+Automatically generate evaluation queries from the indexed chunks themselves
+(e.g. by using the chunk's heading or first sentence as a query and expecting
+the chunk to appear in top-k). This provides broad coverage without manual
+fixture authorship and catches systematic chunking or embedding failures.</p>
+<h3 id="83-metrics">8.3 Metrics<a class="headerlink" href="#83-metrics" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Definition</th>
+<th>Default threshold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recall@k</td>
+<td>Fraction of expected chunks found in top-k results</td>
+<td>≥ 0.85 at k=5</td>
+</tr>
+<tr>
+<td>MRR</td>
+<td>Mean Reciprocal Rank of the first relevant result</td>
+<td>≥ 0.70</td>
+</tr>
+</tbody>
+</table>
+<p>Thresholds are per-corpus defaults, overridable in the corpus eval
+configuration. A corpus passes if both metrics meet their thresholds; otherwise
+the eval command exits non-zero.</p>
+<h3 id="84-ci-integration">8.4 CI integration<a class="headerlink" href="#84-ci-integration" title="Permanent link">&para;</a></h3>
+<p>The eval harness is a pytest suite that can run in CI. For CI, the harness
+requires a running instance of the platform (embedding service + vector store +
+indexed corpus). The recommended CI pattern is:</p>
+<ol>
+<li><code>docker compose up</code> (platform services).</li>
+<li><code>make ingest CORPUS=&lt;target&gt;</code> (build the index).</li>
+<li><code>make eval CORPUS=&lt;target&gt;</code> (run the harness).</li>
+<li><code>docker compose down</code>.</li>
+</ol>
+<h2 id="9-deployment-model">9. Deployment model<a class="headerlink" href="#9-deployment-model" title="Permanent link">&para;</a></h2>
+<h3 id="91-standalone">9.1 Standalone<a class="headerlink" href="#91-standalone" title="Permanent link">&para;</a></h3>
+<p>The repository ships its own <code>compose.yaml</code>. An operator:</p>
+<ol>
+<li>Clones the repo.</li>
+<li>Supplies a corpus (structured documents in a directory).</li>
+<li>Runs <code>docker compose up</code>.</li>
+<li>Runs <code>make ingest CORPUS=&lt;name&gt; SOURCE=./path/to/docs/</code>.</li>
+<li>Has a live ingestion + retrieval service at <code>http://localhost:&lt;port&gt;</code>.</li>
+</ol>
+<p>No dependency on any consuming application's stack.</p>
+<h3 id="92-embedded">9.2 Embedded<a class="headerlink" href="#92-embedded" title="Permanent link">&para;</a></h3>
+<p>Documented integration pattern for operators who want to add the platform as a
+service inside their own existing <code>compose.yaml</code>:</p>
+<ul>
+<li>The platform services (API, vector store, embedding) join an external Docker
+  network.</li>
+<li>Consumers reach the API via <code>RETRIEVAL_API_URL</code> environment variable.</li>
+<li>The docs provide a copy-paste <code>services:</code> block and the required environment
+  variables.</li>
+</ul>
+<p>This must be a copy-paste operation, not a research task.</p>
+<h3 id="93-deployment-topologies">9.3 Deployment topologies<a class="headerlink" href="#93-deployment-topologies" title="Permanent link">&para;</a></h3>
+<p>The platform supports multiple topologies:</p>
+<table>
+<thead>
+<tr>
+<th>Topology</th>
+<th>API server</th>
+<th>Embedding</th>
+<th>Vector store</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All-in-one</td>
+<td>host</td>
+<td>host (container)</td>
+<td>host (container)</td>
+<td>Simplest; single-machine</td>
+</tr>
+<tr>
+<td>Split embedding</td>
+<td>host</td>
+<td>remote node</td>
+<td>host</td>
+<td>Frees host resources</td>
+</tr>
+<tr>
+<td>Fully distributed</td>
+<td>host</td>
+<td>remote node</td>
+<td>remote node</td>
+<td>Centralised, scalable</td>
+</tr>
+</tbody>
+</table>
+<p>The pipeline logic is identical across topologies; only endpoint configuration
+changes. This is enforced by the design principle that all heavy components
+(embedding, vector store) are reached through HTTP clients (section 6.2).</p>
+<h2 id="10-non-functional-requirements">10. Non-functional requirements<a class="headerlink" href="#10-non-functional-requirements" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NFR-1</td>
+<td>Air-gap capable: no internet egress required at runtime</td>
+</tr>
+<tr>
+<td>NFR-2</td>
+<td>GDPR-compatible: no data leaves the deployment perimeter</td>
+</tr>
+<tr>
+<td>NFR-3</td>
+<td>Permissively licensed core (MIT / Apache-2.0 / BSD-3); copyleft</td>
+</tr>
+<tr>
+<td></td>
+<td>only behind process isolation (section 3.1)</td>
+</tr>
+<tr>
+<td>NFR-4</td>
+<td>All dependencies pinned; SBOM maintained</td>
+</tr>
+<tr>
+<td>NFR-5</td>
+<td>Single-machine deployable (no k8s requirement for base case)</td>
+</tr>
+<tr>
+<td>NFR-6</td>
+<td>OpenAPI spec auto-generated for the retrieval API</td>
+</tr>
+</tbody>
+</table>
+<h2 id="11-consequences">11. Consequences<a class="headerlink" href="#11-consequences" title="Permanent link">&para;</a></h2>
+<h3 id="111-positive">11.1 Positive<a class="headerlink" href="#111-positive" title="Permanent link">&para;</a></h3>
+<ul>
+<li>A single, shared ingestion and retrieval service replaces per-tool
+  duplication of embedding infrastructure.</li>
+<li>The HTTP API makes the platform consumable by any language or stack.</li>
+<li>The evaluation harness gives operators a measurable confidence signal
+  before depending on a corpus.</li>
+<li>The deployment model supports both standalone and embedded use with
+  minimal configuration.</li>
+</ul>
+<h3 id="112-negative-trade-offs">11.2 Negative / trade-offs<a class="headerlink" href="#112-negative-trade-offs" title="Permanent link">&para;</a></h3>
+<ul>
+<li>A greenfield build is more work than forking an existing tool; justified
+  by the prior-art analysis (section 2) showing no existing tool matches
+  the required shape.</li>
+<li>HTTP-only retrieval adds serialisation overhead for Python consumers;
+  acceptable given the small query volume and the architectural clarity
+  it provides.</li>
+<li>The evaluation harness requires curated fixtures per corpus, which is
+  manual effort; the auto-generated layer reduces but does not eliminate
+  this cost.</li>
+</ul>
+<h3 id="113-out-of-scope">11.3 Out of scope<a class="headerlink" href="#113-out-of-scope" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Chat, agents, or any application-layer UI.</li>
+<li>User management or authentication (consumers are trusted services).</li>
+<li>Runtime hot-add of documents (build-time indexing only for v0.1.0).</li>
+<li>The tech stack (decided in ADR-002).</li>
+</ul>
+<h2 id="12-open-items">12. Open items<a class="headerlink" href="#12-open-items" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Repo name</strong> — must be generic, no domain specificity. Candidates to
+  evaluate: <code>retrieval-core</code>, <code>docvault</code>, <code>chunkbase</code>, <code>vectra</code>,
+  <code>corpus-engine</code>. Decision required before scaffolding.</li>
+<li>Confirm the retrieval API shape recommendation (Option A) in review.</li>
+<li>Define the corpus directory convention and manifest format.</li>
+<li>Determine whether <code>POST /ingest</code> is a v0.1.0 API endpoint or whether
+  ingestion remains CLI-only until a later release.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 adjiap — Apache-2.0 License
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.integrate", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
